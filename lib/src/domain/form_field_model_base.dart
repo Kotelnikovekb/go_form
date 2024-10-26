@@ -5,7 +5,7 @@ import '../form_controller.dart';
 abstract class FormFieldModelBase<T> {
   final String name;
   final T? initialValue;
-  final String? Function(T?)? validator;
+  final String? Function(dynamic)? validator;
 
   FormFieldModelBase({
     required this.name,

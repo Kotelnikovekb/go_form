@@ -9,7 +9,7 @@ enum ErrorResetMode {
 }
 
 class FormController {
-  final Map<String, FormFieldData<dynamic>> _fields = {};
+  final Map<String, FormFieldData> _fields = {};
 
   bool validateOnFieldChange = false;
   final ErrorResetMode errorResetMode;
@@ -19,10 +19,9 @@ class FormController {
   void addTextField<T>({
     required String name,
     T? initialValue,
-    String? Function(T?)? validator,
+    String? Function(dynamic)? validator,
   }) {
     if(!_fields.containsKey('name')){
-      print(T.runtimeType);
       _fields[name]=FormFieldData<T>(
         initialValue: initialValue,
         validator: validator,
@@ -64,16 +63,10 @@ class FormController {
     return field;
   }
 
-  void _validateField(String name) {
+  void _validateField<T>(String name) {
     final field = _fields[name];
     if (field != null) {
-
-
-
-
-
-      print(field.validator.runtimeType);
-      final error = field.validator?.call(getFieldData(name));
+      final error = field.validator?.call(field.value.value);
       field.error.value = error;
     }
   }

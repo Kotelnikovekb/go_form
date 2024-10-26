@@ -26,30 +26,7 @@ class _DynamicFormState extends State<DynamicForm> {
       child: Column(
         children: List.generate(widget.fields.length * 2 - 1, (index) {
           if (index.isEven) {
-            final field = widget.fields[index ~/ 2];
-            field.addToController(widget.controller);
-
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                field.build(context, widget.controller),
-                ValueListenableBuilder<String?>(
-                  valueListenable: widget.controller.getErrorNotifier(field.name),
-                  builder: (context, error, _) {
-                    return error != null
-                        ? Padding(
-                      padding: const EdgeInsets.only(top: 4.0),
-                      child: Text(
-                        error,
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    )
-                        : const SizedBox.shrink();
-                  },
-                ),
-              ],
-            );
+            return widget.fields[index ~/ 2].build(context, widget.controller);
           } else {
             return SizedBox(height: widget.fieldSpacing);
           }
