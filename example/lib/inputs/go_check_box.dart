@@ -13,8 +13,6 @@ class GoCheckBox extends FormFieldModelBase<bool> {
 
   @override
   Widget build(BuildContext context, FieldController controller) {
-    // Получаем данные поля через FormController
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -22,7 +20,7 @@ class GoCheckBox extends FormFieldModelBase<bool> {
           children: [
             Checkbox(
               focusNode: controller.focusNode,
-              value: controller.fieldValue ?? false,
+              value: controller.fieldValue,
               onChanged: (newValue) {
                 controller.onChange(newValue);
               },

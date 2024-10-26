@@ -19,8 +19,8 @@ abstract class FormFieldModelBase<T> {
 
   Type get fieldType => T;
 
-  void addToController(FormController controller) {
-    controller.addTextField<T>(
+  FieldController<T> addToController(FormController controller) {
+    return controller.addTextField<T>(
       name: name,
       initialValue: initialValue,
       validator: validator,

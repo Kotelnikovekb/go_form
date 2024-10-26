@@ -17,7 +17,7 @@ class FieldController<T> extends ValueNotifier<FormFieldData<T?>>{
     notifyListeners();
   }
 
-  set onError(String? newError) {
+  void setError(String? newError) {
     value.error.value = newError;
     notifyListeners();
   }

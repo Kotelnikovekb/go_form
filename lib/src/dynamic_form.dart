@@ -27,9 +27,15 @@ class _DynamicFormState extends State<DynamicForm> {
       child: Column(
         children: List.generate(widget.fields.length * 2 - 1, (index) {
           final field=widget.fields[index~/2];
-          field.addToController(widget.controller);
+          final controller =field.addToController(widget.controller);
           if (index.isEven) {
-            return widget.fields[index ~/ 2].build(context, widget.controller.getFieldController(field.name));
+            return ValueListenableBuilder(
+              valueListenable: controller,
+              builder: (context, fieldData, child) {
+                return widget.fields[index ~/ 2].build(context, widget.controller.getFieldController(field.name));
+              },
+            );
+
           } else {
             return SizedBox(height: widget.fieldSpacing);
           }

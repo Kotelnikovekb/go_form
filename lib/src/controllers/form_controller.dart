@@ -17,7 +17,7 @@ class FormController {
 
   FormController({this.errorResetMode=ErrorResetMode.resetOnFocus});
 
-  void addTextField<T>({
+  FieldController<T> addTextField<T>({
     required String name,
     T? initialValue,
     String? Function(dynamic)? validator,
@@ -48,6 +48,8 @@ class FormController {
         resetError(name);
       }
     });*/
+
+  return field as FieldController<T>;
   }
 
   FieldController<T> getFieldController<T>(String name) {
@@ -86,16 +88,16 @@ class FormController {
   }
 
   void setError(String name, String? error) {
-    _fields[name]?.onError=error;
+    _fields[name]?.setError(error);
   }
 
   void resetError(String name) {
-    _fields[name]?.onError = null;
+    _fields[name]?.setError(null);
   }
 
   void resetAllErrors() {
     for (var field in _fields.values) {
-      field.onError=null;
+      field.setError(null);
     }
   }
 
@@ -120,20 +122,20 @@ class FormController {
     bool isValid = true;
     resetAllErrors();
     _fields.forEach((name, field) {
-      /*final error = field.validator?.call(field.value.value);
-      field.error.value = error;
+      final error = field.value.validator?.call(field.value.value.value);
+      field.value.error.value = error;
 
       if (error!= null) {
-        print(error);
+        field.setError(error);
         isValid = false;
-      }*/
+      }
     });
     return isValid;
   }
 
 
   Map<String, dynamic> getValues() {
-    return _fields.map((name, field) => MapEntry(name, field.value.value));
+    return _fields.map((name, field) => MapEntry(name, field.value.value.value));
   }
 
 

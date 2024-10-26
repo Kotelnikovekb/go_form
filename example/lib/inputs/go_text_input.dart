@@ -11,8 +11,11 @@ class GoTextInput extends FormFieldModelBase<String>{
     return TextFormField(
       focusNode: controller.focusNode,
       onChanged: (newValue) => controller.onChange(newValue),
-      initialValue: controller.value.value.value,
+      initialValue: controller.fieldValue,
       validator: validator,
+      decoration: InputDecoration(
+        errorText: controller.error
+      ),
     );
   }
 
