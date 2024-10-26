@@ -7,18 +7,17 @@ class GoTextInput extends FormFieldModelBase<String>{
   GoTextInput( {required super.name, super.validator,required this.label,});
 
   @override
-  Widget build(BuildContext context, FormController controller) {
-    final fieldData = controller.getFieldData<String>(name);
+  Widget build(BuildContext context, FieldController controller) {
     return TextFormField(
-      focusNode: fieldData.focusNode,
-      onChanged: (newValue) => fieldData.value.value = newValue,
-      initialValue: fieldData.value.value,
+      focusNode: controller.focusNode,
+      onChanged: (newValue) => controller.onChange(newValue),
+      initialValue: controller.value.value.value,
       validator: validator,
     );
   }
 
   @override
-  getValue(FormController controller) {
+  getValue(FieldController controller) {
     throw UnimplementedError();
   }
 

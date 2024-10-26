@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'domain/domain.dart';
+import '../domain/domain.dart';
+import 'field_controller.dart';
 
 enum ErrorResetMode {
   resetOnFocus,
@@ -9,7 +10,7 @@ enum ErrorResetMode {
 }
 
 class FormController {
-  final Map<String, FormFieldData> _fields = {};
+  final Map<String, FieldController<dynamic>> _fields = {};
 
   bool validateOnFieldChange = false;
   final ErrorResetMode errorResetMode;
@@ -22,20 +23,17 @@ class FormController {
     String? Function(dynamic)? validator,
   }) {
     if(!_fields.containsKey('name')){
-      _fields[name]=FormFieldData<T>(
-        initialValue: initialValue,
-        validator: validator,
-      );
+      if (!_fields.containsKey(name)) {
+        _fields[name] = FieldController<T>(
+          initialValue: initialValue,
+          validator: validator,
+        );
+      }
     }else{
       throw ArgumentError('Поле $name уже используется');
     }
 
     final field = _fields[name]!;
-
-
-
-
-
     field.focusNode.addListener(() {
       if (validateOnFieldChange && !field.focusNode.hasFocus) {
         _validateField(name);
@@ -45,14 +43,30 @@ class FormController {
       }
     });
 
-    field.value.addListener(() {
+/*    field.value.addListener(() {
       if (errorResetMode == ErrorResetMode.resetOnValueChange) {
         resetError(name);
       }
-    });
+    });*/
   }
 
-  FormFieldData<T> getFieldData<T>(String name) {
+  FieldController<T> getFieldController<T>(String name) {
+    final field = _fields[name];
+    if (field == null) {
+      throw ArgumentError("Field '$name' not found");
+    }
+    if (field is! FieldController<T>) {
+      throw TypeError();
+    }
+    return field as FieldController<T>;
+  }
+
+  /// Выполнение валидации поля
+  void validateField<T>(String name) {
+    final fieldController = getFieldController<T>(name);
+  }
+
+  /*FormFieldData<T> getFieldData<T>(String name) {
     final field = _fields[name];
     if (field == null) {
       throw ArgumentError("Field '$name' not found");
@@ -61,27 +75,27 @@ class FormController {
       throw TypeError();
     }
     return field;
-  }
+  }*/
 
   void _validateField<T>(String name) {
-    final field = _fields[name];
+    /*final field = _fields[name];
     if (field != null) {
       final error = field.validator?.call(field.value.value);
       field.error.value = error;
-    }
+    }*/
   }
 
   void setError(String name, String? error) {
-    _fields[name]?.error.value = error;
+    _fields[name]?.onError=error;
   }
 
   void resetError(String name) {
-    _fields[name]?.error.value = null;
+    _fields[name]?.onError = null;
   }
 
   void resetAllErrors() {
     for (var field in _fields.values) {
-      field.error.value = null;
+      field.onError=null;
     }
   }
 
@@ -91,25 +105,28 @@ class FormController {
   }
 
   Map<String, String?> get errors {
-    return _fields.map((name, field) => MapEntry(name, field.error.value));
+    return _fields.map((name, field) => MapEntry(name, field.error));
   }
 
   String? getError(String name) {
-    return _fields[name]?.error.value;
+    return _fields[name]?.error;
   }
 
-  ValueNotifier<String?> getErrorNotifier(String name) {
+/*  ValueNotifier<String?> getErrorNotifier(String name) {
     return _fields[name]?.error ?? ValueNotifier(null);
-  }
+  }*/
 
   bool validate() {
     bool isValid = true;
     resetAllErrors();
     _fields.forEach((name, field) {
-      _validateField(name);
-      if (field.error.value != null) {
+      /*final error = field.validator?.call(field.value.value);
+      field.error.value = error;
+
+      if (error!= null) {
+        print(error);
         isValid = false;
-      }
+      }*/
     });
     return isValid;
   }
@@ -121,18 +138,18 @@ class FormController {
 
 
   void dispose() {
-    for (var field in _fields.values) {
+    /*for (var field in _fields.values) {
       field.value.dispose();
       field.error.dispose();
       field.focusNode.dispose();
-    }
+    }*/
   }
 
   /// Сброисть поля в форме
   void resetAllFields() {
-    _fields.forEach((name, field) {
+   /* _fields.forEach((name, field) {
       field.value.value = null;
-    });
+    });*/
     resetAllErrors();
   }
 

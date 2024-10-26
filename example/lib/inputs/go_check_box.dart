@@ -12,52 +12,37 @@ class GoCheckBox extends FormFieldModelBase<bool> {
   });
 
   @override
-  Widget build(BuildContext context, FormController controller) {
+  Widget build(BuildContext context, FieldController controller) {
     // Получаем данные поля через FormController
-    final fieldData = controller.getFieldData<bool>(name);
 
-    return ValueListenableBuilder<bool?>(
-      valueListenable: fieldData.value,
-      builder: (context, value, _) {
-        return Column(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            Row(
-              children: [
-                Checkbox(
-                  focusNode: fieldData.focusNode,
-                  value: value ?? false,
-                  onChanged: (newValue) {
-                    fieldData.value.value = newValue;
-                    if (newValue != null) {
-                      controller.setError(name, null);
-                    }
-                  },
-                ),
-                Text(label),
-              ],
-            ),
-            ValueListenableBuilder<String?>(
-              valueListenable: fieldData.error,
-              builder: (context, error, _) {
-                return error != null
-                    ? Padding(
-                        padding: const EdgeInsets.only(top: 4.0),
-                        child: Text(
-                          error,
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      )
-                    : const SizedBox.shrink();
+            Checkbox(
+              focusNode: controller.focusNode,
+              value: controller.fieldValue ?? false,
+              onChanged: (newValue) {
+                controller.onChange(newValue);
               },
             ),
+            Text(label),
           ],
-        );
-      },
-    );
-  }
+        ),
+        if (controller.error != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 4.0),
+            child: Text(
+              controller.error!,
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+      ],
+    );  }
 
   @override
-  bool? getValue(FormController controller) {
-    return controller.getFieldData<bool>(name).value.value;
+  bool? getValue(FieldController controller) {
+    return controller.value.value.value;
   }
 }

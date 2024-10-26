@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../form_controller.dart';
+import '../../go_form.dart';
 
 abstract class FormFieldModelBase<T> {
   final String name;
@@ -13,9 +13,9 @@ abstract class FormFieldModelBase<T> {
     this.validator,
   });
 
-  Widget build(BuildContext context, FormController controller);
+  Widget build(BuildContext context, FieldController controller);
 
-  T? getValue(FormController controller);
+  T? getValue(FieldController controller);
 
   Type get fieldType => T;
 
