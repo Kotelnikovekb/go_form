@@ -15,8 +15,6 @@ abstract class FormFieldModelBase<T> {
 
   Widget build(BuildContext context, FieldController controller);
 
-  T? getValue(FieldController controller);
-
   Type get fieldType => T;
 
   FieldController<T> addToController(FormController controller) {

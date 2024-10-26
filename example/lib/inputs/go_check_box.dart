@@ -20,7 +20,7 @@ class GoCheckBox extends FormFieldModelBase<bool> {
           children: [
             Checkbox(
               focusNode: controller.focusNode,
-              value: controller.fieldValue,
+              value: controller.value,
               onChanged: (newValue) {
                 controller.onChange(newValue);
               },
@@ -39,8 +39,4 @@ class GoCheckBox extends FormFieldModelBase<bool> {
       ],
     );  }
 
-  @override
-  bool? getValue(FieldController controller) {
-    return controller.value.value.value;
-  }
 }

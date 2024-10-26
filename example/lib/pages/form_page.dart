@@ -16,7 +16,10 @@ class _FormPageState extends State<FormPage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: widget.body,
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: widget.body,
+      ),
     );
   }
 }

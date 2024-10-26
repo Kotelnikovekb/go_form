@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../domain/domain.dart';
 import 'field_controller.dart';
 
 enum ErrorResetMode {
@@ -122,9 +121,7 @@ class FormController {
     bool isValid = true;
     resetAllErrors();
     _fields.forEach((name, field) {
-      final error = field.value.validator?.call(field.value.value.value);
-      field.value.error.value = error;
-
+      final error = field.validate();
       if (error!= null) {
         field.setError(error);
         isValid = false;
@@ -135,7 +132,7 @@ class FormController {
 
 
   Map<String, dynamic> getValues() {
-    return _fields.map((name, field) => MapEntry(name, field.value.value.value));
+    return _fields.map((name, field) => MapEntry(name, field.value));
   }
 
 

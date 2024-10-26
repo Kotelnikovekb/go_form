@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_form/go_form.dart';
+import 'package:go_form_example/inputs/root_input.dart';
 
 class GoTextInput extends FormFieldModelBase<String>{
   final String label;
@@ -8,20 +9,12 @@ class GoTextInput extends FormFieldModelBase<String>{
 
   @override
   Widget build(BuildContext context, FieldController controller) {
-    return TextFormField(
-      focusNode: controller.focusNode,
+    return RootInput(
       onChanged: (newValue) => controller.onChange(newValue),
-      initialValue: controller.fieldValue,
+      initialValue: controller.value,
       validator: validator,
-      decoration: InputDecoration(
-        errorText: controller.error
-      ),
+      errorText: controller.error,
+      labelText: label,
     );
   }
-
-  @override
-  getValue(FieldController controller) {
-    throw UnimplementedError();
-  }
-
 }

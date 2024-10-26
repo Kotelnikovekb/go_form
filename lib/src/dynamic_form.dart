@@ -30,9 +30,9 @@ class _DynamicFormState extends State<DynamicForm> {
           final controller =field.addToController(widget.controller);
           if (index.isEven) {
             return ValueListenableBuilder(
-              valueListenable: controller,
+              valueListenable: controller.valueListenable,
               builder: (context, fieldData, child) {
-                return widget.fields[index ~/ 2].build(context, widget.controller.getFieldController(field.name));
+                return widget.fields[index ~/ 2].build(context, controller);
               },
             );
 
