@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'domain/domain.dart';
+
 enum ErrorResetMode {
   resetOnFocus,
   resetOnValueChange,
@@ -7,150 +9,152 @@ enum ErrorResetMode {
 }
 
 class FormController {
-  final Map<String, TextEditingController> _controllers = {};
-  final ValueNotifier<Map<String, String?>> _errors = ValueNotifier({});
-  final Map<String, FocusNode> _focusNodes = {};
-
-  final Map<String, String? Function(String?)?> _textValidators = {};
-  final Map<String, String? Function(bool?)?> _checkboxValidators = {};
-
-  final Map<String, bool> _checkboxValues = {};
+  final Map<String, FormFieldData<dynamic>> _fields = {};
 
   bool validateOnFieldChange = false;
   final ErrorResetMode errorResetMode;
 
   FormController({this.errorResetMode=ErrorResetMode.resetOnFocus});
 
-  void addTextField({
+  void addTextField<T>({
     required String name,
-    String? initialValue,
-    String? Function(String?)? validator,
+    T? initialValue,
+    String? Function(T?)? validator,
   }) {
-    _controllers[name] = TextEditingController(text: initialValue);
-    _focusNodes[name] = FocusNode();
+    if(!_fields.containsKey('name')){
+      print(T.runtimeType);
+      _fields[name]=FormFieldData<T>(
+        initialValue: initialValue,
+        validator: validator,
+      );
+    }else{
+      throw ArgumentError('Поле $name уже используется');
+    }
 
-    _textValidators[name] = validator;
+    final field = _fields[name]!;
 
-    _focusNodes[name]!.addListener(() {
-      if (validateOnFieldChange && _focusNodes[name]!.hasFocus == false) {
+
+
+
+
+    field.focusNode.addListener(() {
+      if (validateOnFieldChange && !field.focusNode.hasFocus) {
         _validateField(name);
       }
-      if (errorResetMode == ErrorResetMode.resetOnFocus && _focusNodes[name]!.hasFocus) {
+      if (errorResetMode == ErrorResetMode.resetOnFocus && field.focusNode.hasFocus) {
         resetError(name);
       }
     });
 
-    _controllers[name]!.addListener(() {
+    field.value.addListener(() {
       if (errorResetMode == ErrorResetMode.resetOnValueChange) {
         resetError(name);
       }
     });
   }
 
-  void addCheckboxField({
-    required String name,
-    bool initialValue = false,
-    String? Function(bool?)? validator,
-  }) {
-    _checkboxValues[name] = initialValue;
-    _checkboxValidators[name] = validator;
+  FormFieldData<T> getFieldData<T>(String name) {
+    final field = _fields[name];
+    if (field == null) {
+      throw ArgumentError("Field '$name' not found");
+    }
+    if (field is! FormFieldData<T>) {
+      throw TypeError();
+    }
+    return field;
   }
 
   void _validateField(String name) {
-    if (_controllers.containsKey(name)) {
-      final validator = _textValidators[name];
-      final value = _controllers[name]?.text;
-      final error = validator?.call(value);
-      _errors.value = {..._errors.value, name: error};
-    } else if (_checkboxValues.containsKey(name)) {
-      final validator = _checkboxValidators[name];
-      final value = _checkboxValues[name];
-      final error = validator?.call(value);
-      _errors.value = {..._errors.value, name: error};
+    final field = _fields[name];
+    if (field != null) {
+
+
+
+
+
+      print(field.validator.runtimeType);
+      final error = field.validator?.call(getFieldData(name));
+      field.error.value = error;
     }
   }
 
-  void setError(String name, String error) {
-    _errors.value = {..._errors.value, name: error};
+  void setError(String name, String? error) {
+    _fields[name]?.error.value = error;
   }
 
   void resetError(String name) {
-    _errors.value = {..._errors.value, name: null};
+    _fields[name]?.error.value = null;
   }
 
   void resetAllErrors() {
-    _errors.value = {};
+    for (var field in _fields.values) {
+      field.error.value = null;
+    }
   }
 
-  TextEditingController getController(String name) {
-    return _controllers[name]!;
-  }
 
   FocusNode getFocusNode(String name) {
-    return _focusNodes[name]!;
+    return _fields[name]?.focusNode ?? (throw ArgumentError("Field '$name' not found"));
   }
 
-  bool? getCheckboxValue(String name) {
-    return _checkboxValues[name];
+  Map<String, String?> get errors {
+    return _fields.map((name, field) => MapEntry(name, field.error.value));
   }
-
-  void setCheckboxValue(String name, bool value) {
-    _checkboxValues[name] = value;
-  }
-
-  ValueNotifier<Map<String, String?>> get errors => _errors;
 
   String? getError(String name) {
-    return _errors.value[name];
+    return _fields[name]?.error.value;
+  }
+
+  ValueNotifier<String?> getErrorNotifier(String name) {
+    return _fields[name]?.error ?? ValueNotifier(null);
   }
 
   bool validate() {
     bool isValid = true;
-    _errors.value = {};
-
-    _controllers.forEach((name, controller) {
+    resetAllErrors();
+    _fields.forEach((name, field) {
       _validateField(name);
-      if (_errors.value[name] != null) {
+      if (field.error.value != null) {
         isValid = false;
       }
     });
-
-    _checkboxValues.forEach((name, value) {
-      _validateField(name);
-      if (_errors.value[name] != null) {
-        isValid = false;
-      }
-    });
-
     return isValid;
   }
 
+
   Map<String, dynamic> getValues() {
-    final values = _controllers.map((name, controller) => MapEntry(name, controller.text as dynamic));
-    values.addAll(_checkboxValues);
-    return values;
+    return _fields.map((name, field) => MapEntry(name, field.value.value));
   }
 
+
   void dispose() {
-    _controllers.values.forEach((controller) => controller.dispose());
-    _focusNodes.values.forEach((focusNode) => focusNode.dispose());
+    for (var field in _fields.values) {
+      field.value.dispose();
+      field.error.dispose();
+      field.focusNode.dispose();
+    }
   }
+
   /// Сброисть поля в форме
   void resetAllFields() {
-    for (var controller in _controllers.values) {
-      controller.clear();
-    }
-    _checkboxValues.updateAll((key, value) => false);
+    _fields.forEach((name, field) {
+      field.value.value = null;
+    });
     resetAllErrors();
   }
 
+
   // Метод для получения значения конкретного поля
   dynamic getFieldValue(String name) {
-    if (_controllers.containsKey(name)) {
-      return _controllers[name]!.text;
-    } else if (_checkboxValues.containsKey(name)) {
-      return _checkboxValues[name];
-    }
-    return null;
+    return _fields[name]?.value.value;
+  }
+
+
+  T _defaultValue<T>() {
+    if (T == String) return '' as T;
+    if (T == int) return 0 as T;
+    if (T == double) return 0.0 as T;
+    if (T == bool) return false as T;
+    throw UnsupportedError("Unsupported default value for type $T");
   }
 }

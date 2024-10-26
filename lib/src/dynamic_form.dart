@@ -4,12 +4,12 @@ import 'domain/domain.dart';
 import 'form_controller.dart';
 
 class DynamicForm extends StatefulWidget {
-  final List<FormFieldModelBase> fields;
+  final List<FormFieldModelBase<dynamic>> fields;
   final FormController controller;
   final double fieldSpacing;
 
-
-  const DynamicForm({super.key,
+  const DynamicForm({
+    super.key,
     required this.fields,
     required this.controller,
     this.fieldSpacing = 8.0,
@@ -21,35 +21,39 @@ class DynamicForm extends StatefulWidget {
 
 class _DynamicFormState extends State<DynamicForm> {
   @override
-  void initState() {
-    super.initState();
-    for (var field in widget.fields) {
-      widget.controller.addTextField(name: field.name,initialValue:  field.initialValue,validator: field.validator);
-    }
-  }
-
-  @override
-  void dispose() {
-    widget.controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Form(
-      child: ValueListenableBuilder<Map<String, String?>>(
-        valueListenable: widget.controller.errors,
-        builder: (context, errors, _) {
-          return Column(
-            children: List.generate(widget.fields.length * 2 - 1, (index) {
-              if (index.isEven) {
-                return widget.fields[index ~/ 2].build(context, widget.controller);
-              } else {
-                return SizedBox(height: widget.fieldSpacing);
-              }
-            }),
-          );
-        },
+      child: Column(
+        children: List.generate(widget.fields.length * 2 - 1, (index) {
+          if (index.isEven) {
+            final field = widget.fields[index ~/ 2];
+            field.addToController(widget.controller);
+
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                field.build(context, widget.controller),
+                ValueListenableBuilder<String?>(
+                  valueListenable: widget.controller.getErrorNotifier(field.name),
+                  builder: (context, error, _) {
+                    return error != null
+                        ? Padding(
+                      padding: const EdgeInsets.only(top: 4.0),
+                      child: Text(
+                        error,
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    )
+                        : const SizedBox.shrink();
+                  },
+                ),
+              ],
+            );
+          } else {
+            return SizedBox(height: widget.fieldSpacing);
+          }
+        }),
       ),
     );
   }
