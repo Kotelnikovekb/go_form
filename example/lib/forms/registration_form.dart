@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_form/go_form.dart';
 
-import '../inputs/go_check_box.dart';
 import '../inputs/go_password_input.dart';
-import '../inputs/go_text_input.dart';
+import '../inputs/inputs.dart';
 
 class RegistrationPage extends StatefulWidget {
   const RegistrationPage({super.key});
@@ -24,6 +23,16 @@ class _RegistrationPageState extends State<RegistrationPage> {
             GoTextInput(
               name: 'text',
               label: 'Email',
+              validator: (val) {
+                if (val == null || val.isEmpty) {
+                  return 'Согласись';
+                }
+                return null;
+              },
+            ),
+            GoPhoneInput(
+              name: 'phone',
+              label: 'Phone',
               validator: (val) {
                 if (val == null || val.isEmpty) {
                   return 'Согласись';

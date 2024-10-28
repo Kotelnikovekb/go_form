@@ -12,6 +12,7 @@ class RootInput extends TextFormField {
     Widget? suffixIcon,
     String? labelText,
     super.obscureText,
+    super.inputFormatters,
   }) : super(
           decoration: InputDecoration(
             border: const OutlineInputBorder(),
