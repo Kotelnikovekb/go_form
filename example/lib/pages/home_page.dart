@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../forms/login_form.dart';
+import '../forms/forms.dart';
 import 'form_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -32,7 +32,24 @@ class _HomePageState extends State<HomePage> {
               );
             },
             child: Text('Login'),
-          )
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const FormPage(
+                    title: 'Registration Form',
+                    body: RegistrationPage(),
+                  ),
+                ),
+              );
+            },
+            child: Text('Registration'),
+          ),
         ],
       ),
     );
