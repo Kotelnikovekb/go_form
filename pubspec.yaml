@@ -1,6 +1,6 @@
 name: go_form
 description: "A generic controller for managing state and validation of input fields in Flutter. Supports initial value, validation, errors, and focus."
-version: 0.0.2
+version: 0.1.0
 homepage: https://github.com/Kotelnikovekb/go_form
 
 environment:

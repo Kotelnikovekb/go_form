@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../forms/forms.dart';
+import 'dynamic_actions_page.dart';
 import 'form_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -49,6 +50,19 @@ class _HomePageState extends State<HomePage> {
               );
             },
             child: Text('Registration'),
+
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DynamicActionsPage(),
+                ),
+              );
+            },
+            child: Text('Dynamic Actions'),
+
           ),
         ],
       ),

@@ -13,6 +13,7 @@ class RootInput extends TextFormField {
     String? labelText,
     super.obscureText,
     super.inputFormatters,
+    super.controller,
   }) : super(
           decoration: InputDecoration(
             border: const OutlineInputBorder(),

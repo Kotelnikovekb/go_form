@@ -59,13 +59,13 @@ class FormController {
     if (field is! FieldController<T>) {
       throw TypeError();
     }
-    return field as FieldController<T>;
+    return field;
   }
 
   /// Выполнение валидации поля
-  void validateField<T>(String name) {
+/*  void validateField<T>(String name) {
     final fieldController = getFieldController<T>(name);
-  }
+  }*/
 
   /*FormFieldData<T> getFieldData<T>(String name) {
     final field = _fields[name];
@@ -88,6 +88,10 @@ class FormController {
 
   void setError(String name, String? error) {
     _fields[name]?.setError(error);
+  }
+  void setValue(String name, dynamic value){
+    _fields[name]?.setValue(value);
+
   }
 
   void resetError(String name) {
@@ -159,11 +163,11 @@ class FormController {
   }
 
 
-  T _defaultValue<T>() {
+/*  T _defaultValue<T>() {
     if (T == String) return '' as T;
     if (T == int) return 0 as T;
     if (T == double) return 0.0 as T;
     if (T == bool) return false as T;
     throw UnsupportedError("Unsupported default value for type $T");
-  }
+  }*/
 }
