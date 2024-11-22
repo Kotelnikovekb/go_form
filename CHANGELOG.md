@@ -1,3 +1,8 @@
+## [0.1.1] - 2024-11-22
+### Fixed
+- Fixed an issue with generic type mismatch causing override errors in `FormFieldModelBase.build`.
+
+
 ## 0.1.0
 - Added `FieldController` for form field state management.
 - Support for `TextFormField` synchronization via `TextEditingController`.

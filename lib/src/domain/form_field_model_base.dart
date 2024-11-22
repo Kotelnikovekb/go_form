@@ -13,7 +13,7 @@ abstract class FormFieldModelBase<T> {
     this.validator,
   });
 
-  Widget build(BuildContext context, FieldController controller);
+  Widget build(BuildContext context, FieldController<T> controller);
 
   Type get fieldType => T;
 

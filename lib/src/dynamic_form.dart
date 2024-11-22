@@ -22,24 +22,28 @@ class DynamicForm extends StatefulWidget {
 class _DynamicFormState extends State<DynamicForm> {
   @override
   Widget build(BuildContext context) {
-
+    if(widget.fields.isEmpty){
+      return const SizedBox();
+    }
     return Form(
       child: Column(
-        children: List.generate(widget.fields.length * 2 - 1, (index) {
-          final field=widget.fields[index~/2];
-          final controller =field.addToController(widget.controller);
-          if (index.isEven) {
-            return ValueListenableBuilder(
-              valueListenable: controller.valueListenable,
-              builder: (context, fieldData, child) {
-                return widget.fields[index ~/ 2].build(context, controller);
-              },
-            );
-
-          } else {
-            return SizedBox(height: widget.fieldSpacing);
-          }
-        }),
+        children: List.generate(
+          widget.fields.length * 2 - 1,
+          (index) {
+            final field = widget.fields[index ~/ 2];
+            final controller = field.addToController(widget.controller);
+            if (index.isEven) {
+              return ValueListenableBuilder(
+                valueListenable: controller.valueListenable,
+                builder: (context, fieldData, child) {
+                  return widget.fields[index ~/ 2].build(context, controller);
+                },
+              );
+            } else {
+              return SizedBox(height: widget.fieldSpacing);
+            }
+          },
+        ),
       ),
     );
   }

@@ -7,7 +7,7 @@ class GoDynamicInput extends FormFieldModelBase<String>{
   GoDynamicInput( {required super.name, super.validator,required this.label,});
 
   @override
-  Widget build(BuildContext context, FieldController controller) {
+  Widget build(BuildContext context, FieldController<String> controller) {
     return TextFormField(
       decoration: InputDecoration(
         border: const OutlineInputBorder(),
