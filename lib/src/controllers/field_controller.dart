@@ -7,6 +7,7 @@ class FieldController<T> extends ChangeNotifier {
   TextEditingController? _textEditingController;
   T? get value => _valueNotifier.value.value.value;
   final ValueNotifier<FormFieldData<T?>> _valueNotifier;
+  final List<VoidCallback> _listeners = [];
 
   FieldController({
     T? initialValue,

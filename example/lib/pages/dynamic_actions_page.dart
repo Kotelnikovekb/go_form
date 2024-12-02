@@ -15,6 +15,15 @@ class _DynamicActionsPageState extends State<DynamicActionsPage> {
   final _formController = FormController();
 
   @override
+  void initState() {
+    super.initState();
+    _formController.addListener((){
+      print('${_formController.getValues()}');
+
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(

@@ -1,3 +1,16 @@
+## [0.2.0] - 2024-12-02
+
+### Added
+- **Listener support**: Introduced the ability to add, remove, and check listeners for `FieldController` and `FormController`.
+  - New methods in `FormController`:
+    - `addListener(String name, VoidCallback listener)`: Attach a listener to a specific field.
+    - `removeListener(String name, VoidCallback listener)`: Detach a listener from a specific field.
+    - `hasListener(String name)`: Check if a field has listeners attached.
+  - Enhancements to `FieldController`:
+    - Stores and triggers custom listeners on value changes.
+    - Exposes `hasListeners` to check if listeners are registered.
+
+
 ## [0.1.1] - 2024-11-22
 ### Fixed
 - Fixed an issue with generic type mismatch causing override errors in `FormFieldModelBase.build`.

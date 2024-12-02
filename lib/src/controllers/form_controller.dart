@@ -15,6 +15,8 @@ class FormController {
   final ErrorResetMode errorResetMode;
 
   FormController({this.errorResetMode=ErrorResetMode.resetOnFocus});
+  final List<VoidCallback> _listeners = [];
+
 
   FieldController<T> addTextField<T>({
     required String name,
@@ -27,6 +29,11 @@ class FormController {
           initialValue: initialValue,
           validator: validator,
         );
+        _fields[name]!.addListener((){
+          for (final listener in _listeners) {
+            listener();
+          }
+        });
       }
     }else{
       throw ArgumentError('Поле $name уже используется');
@@ -50,6 +57,17 @@ class FormController {
 
   return field as FieldController<T>;
   }
+
+  bool get hasListeners => _listeners.isNotEmpty;
+
+  void addListener(VoidCallback listener) {
+    _listeners.add(listener);
+  }
+
+  void removeListener(VoidCallback listener) {
+    _listeners.remove(listener);
+  }
+
 
   FieldController<T> getFieldController<T>(String name) {
     final field = _fields[name];
@@ -92,10 +110,13 @@ class FormController {
   void setValue(String name, dynamic value){
     _fields[name]?.setValue(value);
 
+
+
   }
 
   void resetError(String name) {
     _fields[name]?.setError(null);
+
   }
 
   void resetAllErrors() {
@@ -161,6 +182,8 @@ class FormController {
   dynamic getFieldValue(String name) {
     return _fields[name]?.value.value;
   }
+
+
 
 
 /*  T _defaultValue<T>() {
