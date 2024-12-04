@@ -1,3 +1,8 @@
+## [0.2.1] - 2024-12-04
+### Fixes
+- Fixed form reset issue.
+- Fixed field data retrieval issue.
+
 ## [0.2.0] - 2024-12-02
 
 ### Added

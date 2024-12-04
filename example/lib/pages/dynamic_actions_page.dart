@@ -64,6 +64,19 @@ class _DynamicActionsPageState extends State<DynamicActionsPage> {
           SizedBox(
             height: 30,
           ),
+          ElevatedButton(
+            onPressed: () {
+             _formController.resetAllFields();
+            },
+            child: Text('Очистить поля'),
+          ),
+
+          ElevatedButton(
+            onPressed: () {
+              print(_formController.getFieldValue<String>('text'));
+            },
+            child: Text('Очистить поля'),
+          ),
         ],
       ),
     );

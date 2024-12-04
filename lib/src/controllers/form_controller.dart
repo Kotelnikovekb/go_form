@@ -171,16 +171,15 @@ class FormController {
 
   /// Сброисть поля в форме
   void resetAllFields() {
-   /* _fields.forEach((name, field) {
-      field.value.value = null;
-    });*/
-    resetAllErrors();
+    _fields.forEach((name, field) {
+      field.setValue(null);
+    });
   }
 
 
   // Метод для получения значения конкретного поля
-  dynamic getFieldValue(String name) {
-    return _fields[name]?.value.value;
+  T? getFieldValue<T>(String name) {
+    return _fields[name]?.value as T?;
   }
 
 
