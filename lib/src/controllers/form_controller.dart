@@ -13,30 +13,30 @@ class FormController {
 
   bool validateOnFieldChange = false;
   final ErrorResetMode errorResetMode;
+  bool debug;
 
-  FormController({this.errorResetMode=ErrorResetMode.resetOnFocus});
+  FormController({
+    this.errorResetMode = ErrorResetMode.resetOnFocus,
+    this.debug=false,
+  });
+
   final List<VoidCallback> _listeners = [];
-
 
   FieldController<T> addTextField<T>({
     required String name,
     T? initialValue,
     String? Function(dynamic)? validator,
   }) {
-    if(!_fields.containsKey('name')){
-      if (!_fields.containsKey(name)) {
-        _fields[name] = FieldController<T>(
-          initialValue: initialValue,
-          validator: validator,
-        );
-        _fields[name]!.addListener((){
-          for (final listener in _listeners) {
-            listener();
-          }
-        });
-      }
-    }else{
-      throw ArgumentError('Поле $name уже используется');
+    if (!_fields.containsKey(name)) {
+      _fields[name] = FieldController<T>(
+        initialValue: initialValue,
+        validator: validator,
+      );
+      _fields[name]!.addListener(() {
+        for (final listener in _listeners) {
+          listener();
+        }
+      });
     }
 
     final field = _fields[name]!;
@@ -44,7 +44,8 @@ class FormController {
       if (validateOnFieldChange && !field.focusNode.hasFocus) {
         _validateField(name);
       }
-      if (errorResetMode == ErrorResetMode.resetOnFocus && field.focusNode.hasFocus) {
+      if (errorResetMode == ErrorResetMode.resetOnFocus &&
+          field.focusNode.hasFocus) {
         resetError(name);
       }
     });
@@ -55,7 +56,7 @@ class FormController {
       }
     });*/
 
-  return field as FieldController<T>;
+    return field as FieldController<T>;
   }
 
   bool get hasListeners => _listeners.isNotEmpty;
@@ -67,7 +68,6 @@ class FormController {
   void removeListener(VoidCallback listener) {
     _listeners.remove(listener);
   }
-
 
   FieldController<T> getFieldController<T>(String name) {
     final field = _fields[name];
@@ -107,16 +107,27 @@ class FormController {
   void setError(String name, String? error) {
     _fields[name]?.setError(error);
   }
-  void setValue(String name, dynamic value){
-    _fields[name]?.setValue(value);
 
+  void setValue(String name, dynamic value) {
+    if(debug){
+      if(_fields[name]==null){
+        throw ArgumentError("Field '$name' not found");
+      }
+      _fields[name]?.setValue(value);
+    }else{
+      _fields[name]?.setValue(value);
+    }
+  }
 
-
+  List<String> getAllKeys(){
+    return _fields.keys.toList();
+  }
+  bool isKeyExist(String key){
+    return _fields.containsKey(key);
   }
 
   void resetError(String name) {
     _fields[name]?.setError(null);
-
   }
 
   void resetAllErrors() {
@@ -125,9 +136,9 @@ class FormController {
     }
   }
 
-
   FocusNode getFocusNode(String name) {
-    return _fields[name]?.focusNode ?? (throw ArgumentError("Field '$name' not found"));
+    return _fields[name]?.focusNode ??
+        (throw ArgumentError("Field '$name' not found"));
   }
 
   Map<String, String?> get errors {
@@ -147,7 +158,7 @@ class FormController {
     resetAllErrors();
     _fields.forEach((name, field) {
       final error = field.validate();
-      if (error!= null) {
+      if (error != null) {
         field.setError(error);
         isValid = false;
       }
@@ -155,11 +166,9 @@ class FormController {
     return isValid;
   }
 
-
   Map<String, dynamic> getValues() {
     return _fields.map((name, field) => MapEntry(name, field.value));
   }
-
 
   void dispose() {
     /*for (var field in _fields.values) {
@@ -176,14 +185,10 @@ class FormController {
     });
   }
 
-
   // Метод для получения значения конкретного поля
   T? getFieldValue<T>(String name) {
     return _fields[name]?.value as T?;
   }
-
-
-
 
 /*  T _defaultValue<T>() {
     if (T == String) return '' as T;

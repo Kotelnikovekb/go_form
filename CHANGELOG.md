@@ -1,3 +1,8 @@
+## [0.2.2] - 2024-12-04
+### Fixes
+- Fixed the "name field is already in use" issue.
+- Disabled protection against duplicate field creation.
+
 ## [0.2.1] - 2024-12-04
 ### Fixes
 - Fixed form reset issue.

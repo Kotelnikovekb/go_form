@@ -56,17 +56,23 @@ class FieldController<T> extends ChangeNotifier {
     notifyListeners();
   }
   void setValue(dynamic newValue) {
-    _valueNotifier.value=FormFieldData<T?>(
-      initialValue: newValue,
-      validator: _valueNotifier.value.validator,
-      error: _valueNotifier.value.error,
-    );
-    if (T == String && _textEditingController != null) {
-      if (_textEditingController!.text != newValue) {
-        _textEditingController!.text = newValue as String? ?? '';
+    if(newValue is T||newValue==null){
+      _valueNotifier.value=FormFieldData<T?>(
+        initialValue: newValue,
+        validator: _valueNotifier.value.validator,
+        error: _valueNotifier.value.error,
+      );
+      if (T == String && _textEditingController != null) {
+        if (_textEditingController!.text != newValue) {
+          _textEditingController!.text = newValue as String? ?? '';
+        }
       }
+      notifyListeners();
+    }else{
+      print('type ${newValue.runtimeType} not ${T.runtimeType} or null');
     }
-    notifyListeners();
+
+
   }
 
   void clearError() {
