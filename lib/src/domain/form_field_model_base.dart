@@ -5,7 +5,7 @@ import '../../go_form.dart';
 abstract class FormFieldModelBase<T> {
   final String name;
   final T? initialValue;
-  final String? Function(dynamic)? validator;
+  final String? Function(T?)? validator;
 
   FormFieldModelBase({
     required this.name,

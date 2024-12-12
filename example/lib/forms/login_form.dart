@@ -21,7 +21,7 @@ class _LoginFormState extends State<LoginForm> {
         DynamicForm(
           fields: [
             GoTextInput(
-              name: 'text',
+              name: 'email',
               label: 'Email',
               validator: (val) {
                 if (val == null || val.isEmpty) {
@@ -31,7 +31,7 @@ class _LoginFormState extends State<LoginForm> {
               },
             ),
             GoPasswordInput(
-              name: 'text',
+              name: 'password',
               label: 'Password',
               validator: (val) {
                 if (val == null || val.isEmpty) {

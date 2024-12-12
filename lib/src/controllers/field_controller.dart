@@ -11,7 +11,7 @@ class FieldController<T> extends ChangeNotifier {
 
   FieldController({
     T? initialValue,
-    String? Function(dynamic)? validator,
+    String? Function(T?)? validator,
   }) : _valueNotifier = ValueNotifier(
           FormFieldData<T?>(
             initialValue: initialValue,

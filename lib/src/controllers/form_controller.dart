@@ -25,7 +25,7 @@ class FormController {
   FieldController<T> addTextField<T>({
     required String name,
     T? initialValue,
-    String? Function(dynamic)? validator,
+    String? Function(T?)? validator,
   }) {
     if (!_fields.containsKey(name)) {
       _fields[name] = FieldController<T>(

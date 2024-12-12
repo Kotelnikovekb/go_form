@@ -4,7 +4,7 @@ class FormFieldData<T> {
   final ValueNotifier<T?> value;
   String? error;
   final FocusNode focusNode;
-  final String? Function(dynamic value)? validator;
+  final String? Function(T? value)? validator;
 
   FormFieldData({
     T? initialValue,

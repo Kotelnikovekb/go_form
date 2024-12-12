@@ -1,3 +1,7 @@
+## [0.2.3] - 2024-12-04
+### Fixes
+- Fixed issue with `initialValue` in the widget.
+
 ## [0.2.2] - 2024-12-04
 ### Fixes
 - Fixed the "name field is already in use" issue.

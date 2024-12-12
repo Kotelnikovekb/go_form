@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../forms/forms.dart';
 import 'dynamic_actions_page.dart';
 import 'form_page.dart';
+import 'init_values_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -62,6 +63,19 @@ class _HomePageState extends State<HomePage> {
               );
             },
             child: Text('Dynamic Actions'),
+
+          ),
+
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => InitValuesPage(),
+                ),
+              );
+            },
+            child: Text('Init values'),
 
           ),
         ],
