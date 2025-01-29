@@ -1,3 +1,17 @@
+## [0.3.1] - 2025-01-29
+### Added
+- Introduced a named constructor `DynamicForm.separator`, allowing the use of `separatorBuilder` for custom separators between form fields.
+- If `separatorBuilder` is provided, it will be used instead of the default `SizedBox(height: fieldSpacing)`, offering greater flexibility in UI customization.
+
+### Example:
+```dart
+DynamicForm.separator(
+  fields: myFields,
+  controller: myController,
+  separatorBuilder: (context, index) => Divider(),
+);
+```
+
 ## [0.2.3] - 2024-12-04
 ### Fixes
 - Fixed issue with `initialValue` in the widget.

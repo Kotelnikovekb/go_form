@@ -13,11 +13,11 @@ class FieldController<T> extends ChangeNotifier {
     T? initialValue,
     String? Function(T?)? validator,
   }) : _valueNotifier = ValueNotifier(
-          FormFieldData<T?>(
-            initialValue: initialValue,
-            validator: validator,
-          ),
-        );
+    FormFieldData<T?>(
+      initialValue: initialValue,
+      validator: validator,
+    ),
+  );
 
 
   TextEditingController? get textController {
