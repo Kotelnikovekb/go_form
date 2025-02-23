@@ -1,3 +1,24 @@
+## [1.0.0] - 2025-02-24
+
+### New Features
+- **Added documentation** – full README with examples, API descriptions, and usage instructions.  
+- **Added support for `key`** – now widgets can be identified more easily in tests.
+
+### Improvements
+- **Optimized `dispose()` in `FormController`** – resources are now properly cleaned up.
+- **Enhanced handling of `key` properties** – fields can now use keys for better identification.
+- **Optimized UI re-rendering** – reduced unnecessary rebuilds.
+
+### 🐞 Bug Fixes
+- Fixed memory leak issues related to `dispose()`.
+- Fixed test failures caused by missing `key` properties.
+- Improved error handling in form validation.
+
+### Developer Experience
+- **Added full documentation** – with examples, project structure, and best practices.  
+- **Added new tests** – improved unit and widget test coverage.  
+- **Cleaner and more efficient code** – improved architecture and optimized UI updates.
+
 ## [0.3.1] - 2025-01-29
 ### Added
 - Introduced a named constructor `DynamicForm.separator`, allowing the use of `separatorBuilder` for custom separators between form fields.

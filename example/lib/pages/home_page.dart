@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_form_example/pages/test_form_page.dart';
 
 import '../forms/forms.dart';
 import 'dynamic_actions_page.dart';
@@ -76,6 +77,18 @@ class _HomePageState extends State<HomePage> {
               );
             },
             child: Text('Init values'),
+
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TestFormPage(),
+                ),
+              );
+            },
+            child: Text('Test'),
 
           ),
         ],

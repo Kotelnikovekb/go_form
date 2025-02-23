@@ -3,8 +3,40 @@ import 'package:flutter/material.dart';
 
 import '../domain/domain.dart';
 
+/// Controller for managing the state of an individual form field.
+///
+/// `FieldController` is used inside custom form field widgets
+/// to handle values, validation, errors, and focus.
+/// **Developers do not interact with this controller directly** –
+/// it is automatically created in `DynamicForm` and passed to custom fields.
+///
+/// ### 📌 Example of a custom field:
+/// ```dart
+/// class GoTextInput extends FormFieldModelBase<String> {
+///   final String label;
+///
+///   GoTextInput({required super.name, super.validator, required this.label});
+///
+///   @override
+///   Widget build(BuildContext context, FieldController controller) {
+///     return RootInput(
+///       onChanged: (newValue) => controller.onChange(newValue),
+///       initialValue: controller.value,
+///       validator: validator,
+///       errorText: controller.error,
+///       labelText: label,
+///     );
+///   }
+/// }
+/// ```
+/// 🔹 `controller.value` – current field value.
+/// 🔹 `controller.onChange(newValue)` – updates the field value.
+/// 🔹 `controller.error` – error message if the field is invalid.
+///
+/// ---
 class FieldController<T> extends ChangeNotifier {
   TextEditingController? _textEditingController;
+
   T? get value => _valueNotifier.value.value.value;
   final ValueNotifier<FormFieldData<T?>> _valueNotifier;
   final List<VoidCallback> _listeners = [];
@@ -13,12 +45,11 @@ class FieldController<T> extends ChangeNotifier {
     T? initialValue,
     String? Function(T?)? validator,
   }) : _valueNotifier = ValueNotifier(
-    FormFieldData<T?>(
-      initialValue: initialValue,
-      validator: validator,
-    ),
-  );
-
+          FormFieldData<T?>(
+            initialValue: initialValue,
+            validator: validator,
+          ),
+        );
 
   TextEditingController? get textController {
     if (T == String) {
@@ -55,9 +86,10 @@ class FieldController<T> extends ChangeNotifier {
     );
     notifyListeners();
   }
+
   void setValue(dynamic newValue) {
-    if(newValue is T||newValue==null){
-      _valueNotifier.value=FormFieldData<T?>(
+    if (newValue is T || newValue == null) {
+      _valueNotifier.value = FormFieldData<T?>(
         initialValue: newValue,
         validator: _valueNotifier.value.validator,
         error: _valueNotifier.value.error,
@@ -68,11 +100,17 @@ class FieldController<T> extends ChangeNotifier {
         }
       }
       notifyListeners();
-    }else{
+    } else {
       print('type ${newValue.runtimeType} not ${T.runtimeType} or null');
     }
+  }
 
-
+  @override
+  void dispose() {
+    super.dispose();
+    _valueNotifier.dispose();
+    _textEditingController?.dispose();
+    _listeners.clear();
   }
 
   void clearError() {
@@ -88,7 +126,6 @@ class FieldController<T> extends ChangeNotifier {
 
   ValueListenable<FormFieldData<T?>> get valueListenable => _valueNotifier;
 
-  /// Получение `FocusNode`
   FocusNode get focusNode => _valueNotifier.value.focusNode;
 
   String? validate() {

@@ -39,7 +39,7 @@ import 'controllers/form_controller.dart';
 ///
 /// The widget uses a `Column` to arrange fields, inserting either a fixed space (`fieldSpacing`)
 /// or a widget provided by `separatorBuilder` between them.
-class DynamicForm extends StatefulWidget {
+class DynamicForm extends StatelessWidget{
   /// The list of form fields to be rendered.
   final List<FormFieldModelBase<dynamic>> fields;
 
@@ -54,8 +54,6 @@ class DynamicForm extends StatefulWidget {
   final NullableIndexedWidgetBuilder? separatorBuilder;
 
   /// Creates a `DynamicForm` with optional spacing between fields.
-  ///
-  /// Use this constructor when you want to use fixed spacing (`fieldSpacing`) between form fields.
   const DynamicForm({
     super.key,
     required this.fields,
@@ -65,9 +63,6 @@ class DynamicForm extends StatefulWidget {
   });
 
   /// Creates a `DynamicForm` that uses a custom separator between fields.
-  ///
-  /// Use this constructor when you want to define a custom separator via `separatorBuilder`
-  /// instead of using fixed spacing.
   const DynamicForm.separator({
     super.key,
     required this.fields,
@@ -76,35 +71,30 @@ class DynamicForm extends StatefulWidget {
   }) : fieldSpacing = 0.0;
 
   @override
-  DynamicFormState createState() => DynamicFormState();
-}
-
-class DynamicFormState extends State<DynamicForm> {
-  @override
   Widget build(BuildContext context) {
-    if (widget.fields.isEmpty) {
+    if (fields.isEmpty) {
       return const SizedBox();
     }
-    return Form(
-      child: Column(
-        children: List.generate(
-          widget.fields.length * 2 - 1,
-          (index) {
-            final field = widget.fields[index ~/ 2];
-            final controller = field.addToController(widget.controller);
-            if (index.isEven) {
-              return ValueListenableBuilder(
-                valueListenable: controller.valueListenable,
-                builder: (context, fieldData, child) {
-                  return widget.fields[index ~/ 2].build(context, controller);
-                },
-              );
-            } else {
-              return widget.separatorBuilder?.call(context, index) ??
-                  SizedBox(height: widget.fieldSpacing);
-            }
-          },
-        ),
+    return Column(
+      children: List.generate(
+        fields.length * 2 - 1,
+            (index) {
+          final field = fields[index ~/ 2];
+          final controller = field.addToController(this.controller);
+
+          if (index.isEven) {
+            return ValueListenableBuilder(
+              key: field.key,
+              valueListenable: controller.valueListenable,
+              builder: (context, fieldData, child) {
+                return field.build(context, controller);
+              },
+            );
+          } else {
+            return separatorBuilder?.call(context, index) ??
+                SizedBox(height: fieldSpacing);
+          }
+        },
       ),
     );
   }
