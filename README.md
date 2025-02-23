@@ -1,4 +1,20 @@
 # GoForm
+ 
+**Available Translations:**
+- [English](README.md)
+- [Русский](README_RU.md)
+
+---
+[![Pub](https://img.shields.io/pub/v/go_form)](https://pub.dev/packages/go_form)
+
+- [How to Install](#how-to-install)
+- [Features](#features-of-goform)
+- [Quick Start](#quick-start)
+  - [Creating a Form with Dynamic Fields](#creating-a-form-with-dynamic-fields)
+  - [Validation Check Before Submission](#validation-check-before-submission)
+  - [Adding Errors](#adding-errors)
+  - [Resetting the Form](#resetting-the-form)
+- [How to Create a Custom Field?](#how-to-create-a-custom-field)
 
 GoForm is a powerful library for managing forms in Flutter.  
 It allows you to dynamically create, validate, and manage form state  
@@ -135,3 +151,9 @@ class GoTextInput extends FormFieldModelBase<String> {
   }
 }
 ```
+
+# About the author
+My telegram channel - [@kotelnikoff_dev](https://t.me/kotelnikoff_dev)
+### Contributions
+
+Contributions are welcome! Feel free to open issues or create pull requests on the [GitHub repository](https://github.com/Kotelnikovekb/go_form).
