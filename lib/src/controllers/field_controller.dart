@@ -35,15 +35,18 @@ import '../domain/domain.dart';
 ///
 /// ---
 class FieldController<T> extends ChangeNotifier {
+  final Key? key;
   TextEditingController? _textEditingController;
 
   T? get value => _valueNotifier.value.value.value;
   final ValueNotifier<FormFieldData<T?>> _valueNotifier;
   final List<VoidCallback> _listeners = [];
 
-  FieldController({
+
+  FieldController( {
     T? initialValue,
     String? Function(T?)? validator,
+    this.key,
   }) : _valueNotifier = ValueNotifier(
           FormFieldData<T?>(
             initialValue: initialValue,
@@ -108,9 +111,11 @@ class FieldController<T> extends ChangeNotifier {
   @override
   void dispose() {
     super.dispose();
+    _valueNotifier.value.dispose();
     _valueNotifier.dispose();
     _textEditingController?.dispose();
     _listeners.clear();
+
   }
 
   void clearError() {

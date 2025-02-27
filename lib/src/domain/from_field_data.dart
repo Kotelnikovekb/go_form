@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 
 class FormFieldData<T> {
   final ValueNotifier<T?> value;
-  String? error;
+  final String? error;
   final FocusNode focusNode;
   final String? Function(T? value)? validator;
+  final Key? key;
 
-  FormFieldData({
+  FormFieldData( {
     T? initialValue,
     this.validator,
     this.error,
+    this.key,
   })  : value = ValueNotifier<T?>(initialValue),
         focusNode = FocusNode();
 
@@ -35,5 +37,9 @@ class FormFieldData<T> {
     );
   }
 
+  void dispose() {
+    focusNode.dispose();
+    value.dispose();
+  }
 
 }

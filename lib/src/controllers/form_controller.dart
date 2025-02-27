@@ -95,6 +95,7 @@ class FormController {
       _fields[name] = FieldController<T>(
         initialValue: initialValue,
         validator: validator,
+        key: key,
       );
       _fields[name]!.addListener(() {
         for (final listener in _listeners) {
@@ -348,6 +349,61 @@ class FormController {
           .where((entry) => entry.value.error != null)
           .map((entry) => MapEntry(entry.key, entry.value.error!)),
     );
+  }
+  List<Key?> get errorsKeys{
+    return _fields.entries
+        .where((entry) => entry.value.error != null)
+        .map((entry) => entry.value.key).toList();
+  }
+
+  Key? get firstFieldKey{
+    return _fields.isNotEmpty ? _fields.entries.first.value.key : null;
+  }
+
+  FocusNode? get getErrorFocusNode {
+    return _fields.entries
+        .where((entry) => entry.value.error != null)
+        .map((entry) => entry.value.focusNode)
+        .firstOrNull;
+  }
+  /// Scrolls to the first input field.
+  ///
+  /// This method retrieves the first `FocusNode` from `_fields`
+  /// and scrolls to it using `Scrollable.ensureVisible()`.
+  void scrollToFirstField() {
+    if (_fields.isEmpty) return;
+
+    FocusNode firstNode = _fields.entries.first.value.focusNode;
+
+    Scrollable.ensureVisible(
+      firstNode.context!,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+    firstNode.requestFocus();
+  }
+
+
+  /// Scrolls to the first field with an error.
+  ///
+  /// This method searches for the first `FocusNode` in `_fields` that has an error
+  /// and scrolls to it using `Scrollable.ensureVisible()`.
+  void scrollToFirstErrorField() {
+    FocusNode? errorNode = getErrorFocusNode;
+    if (errorNode == null) return;
+
+    if (errorNode.context != null) {
+      Scrollable.ensureVisible(
+        errorNode.context!,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+      errorNode.requestFocus();
+    }else{
+      if(debug){
+        print('getErrorFocusNode not found');
+      }
+    }
   }
 
   /// Retrieves the validation error message for a specific field.

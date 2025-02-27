@@ -1,3 +1,21 @@
+## [1.1.0] - 2025-02-28
+### Added
+- **Getter `errorsKey`**: Returns a `List<Key?>` containing all elements with validation errors.
+- **Method `firstFieldKey`**: Returns the `Key` of the first element in `_fields`, or `null` if `_fields` is empty.
+- **Method `scrollToFirstField()`**: Automatically scrolls to the first field in `_fields` and requests focus.
+- **Method `scrollToFirstErrorField()`**: Scrolls to the first field with an error and requests focus.
+- Improved validation handling: now it's easier to locate and scroll to invalid fields.
+
+### Fixed
+- Resolved potential issues with `Key` handling in forms.
+
+### Usage
+#### **Scroll to the first field**
+You can now automatically scroll to the first field in `_fields`:
+```dart
+scrollToFirstField();
+```
+
 ## [1.0.0] - 2025-02-24
 
 ### New Features

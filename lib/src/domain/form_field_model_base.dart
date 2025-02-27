@@ -102,6 +102,7 @@ abstract class FormFieldModelBase<T> {
       name: name,
       initialValue: initialValue,
       validator: validator,
+      key: key,
     );
   }
 }

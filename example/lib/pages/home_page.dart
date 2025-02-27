@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_form_example/pages/test_form_page.dart';
 
 import '../forms/forms.dart';
+import 'big_list_page.dart';
 import 'dynamic_actions_page.dart';
 import 'form_page.dart';
 import 'init_values_page.dart';
@@ -89,6 +90,18 @@ class _HomePageState extends State<HomePage> {
               );
             },
             child: Text('Test'),
+
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BigListPage(),
+                ),
+              );
+            },
+            child: Text('big list'),
 
           ),
         ],

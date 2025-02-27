@@ -4,7 +4,7 @@ import 'package:go_form/go_form.dart';
 class GoDynamicInput extends FormFieldModelBase<String> {
   final String label;
 
-  GoDynamicInput({
+  GoDynamicInput( {
     required super.name,
     super.validator,
     required this.label,

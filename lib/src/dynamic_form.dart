@@ -39,7 +39,7 @@ import 'controllers/form_controller.dart';
 ///
 /// The widget uses a `Column` to arrange fields, inserting either a fixed space (`fieldSpacing`)
 /// or a widget provided by `separatorBuilder` between them.
-class DynamicForm extends StatelessWidget{
+class DynamicForm extends StatelessWidget {
   /// The list of form fields to be rendered.
   final List<FormFieldModelBase<dynamic>> fields;
 
@@ -78,16 +78,22 @@ class DynamicForm extends StatelessWidget{
     return Column(
       children: List.generate(
         fields.length * 2 - 1,
-            (index) {
+        (index) {
           final field = fields[index ~/ 2];
           final controller = field.addToController(this.controller);
 
           if (index.isEven) {
             return ValueListenableBuilder(
-              key: field.key,
               valueListenable: controller.valueListenable,
               builder: (context, fieldData, child) {
-                return field.build(context, controller);
+                return Focus(
+                  key: field.key,
+                  focusNode: controller.focusNode,
+                  child: field.build(
+                    context,
+                    controller,
+                  ),
+                );
               },
             );
           } else {
