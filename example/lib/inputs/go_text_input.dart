@@ -15,6 +15,7 @@ class GoTextInput extends FormFieldModelBase<String>{
       validator: validator,
       errorText: controller.error,
       labelText: label,
+
     );
   }
 }

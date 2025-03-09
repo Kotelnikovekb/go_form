@@ -19,7 +19,6 @@ class GoCheckBox extends FormFieldModelBase<bool> {
         Row(
           children: [
             Checkbox(
-              focusNode: controller.focusNode,
               value: controller.value,
               onChanged: (newValue) {
                 controller.onChange(newValue);

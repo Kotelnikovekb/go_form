@@ -35,6 +35,10 @@ class FormController {
   /// Stores form fields by their names.
   final Map<String, FieldController<dynamic>> _fields = {};
 
+  bool _lastValidationState = false;
+  bool _isValidationRunning = false;
+
+
   /// Determines whether validation should trigger on field value changes.
   ///
   /// If `true`, validation runs automatically when a field's value changes.
@@ -56,6 +60,7 @@ class FormController {
   });
 
   final List<VoidCallback> _listeners = [];
+  final List<void Function(bool)> _validationListeners = [];
 
   /// Registers a new text field in the form and returns its `FieldController<T>`.
   ///
@@ -98,9 +103,8 @@ class FormController {
         key: key,
       );
       _fields[name]!.addListener(() {
-        for (final listener in _listeners) {
-          listener();
-        }
+        _notifyListeners();
+        _silentValidate();
       });
     }
 
@@ -116,6 +120,39 @@ class FormController {
     });
 
     return field as FieldController<T>;
+  }
+
+  void _notifyListeners() {
+    for (final listener in _listeners) {
+      listener();
+    }
+  }
+
+  void _silentValidate() {
+    if (_isValidationRunning) return;
+    _isValidationRunning = true;
+
+    Future.microtask(() {
+      bool isValid = _isValid();
+
+      if (isValid != _lastValidationState) {
+        _lastValidationState = isValid;
+        for (final listener in _validationListeners) {
+          listener(isValid);
+        }
+      }
+
+      _isValidationRunning = false;
+    });
+  }
+
+  bool _isValid() {
+    for (var field in _fields.values) {
+      if (!field.silentValidate()) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /// Checks if there are any registered listeners.
@@ -161,6 +198,14 @@ class FormController {
   /// - **Parameter `listener`** – The listener function to be removed.
   void removeListener(VoidCallback listener) {
     _listeners.remove(listener);
+  }
+
+  void addValidationListener(void Function(bool) listener) {
+    _validationListeners.add(listener);
+  }
+
+  void removeValidationListener(void Function(bool) listener) {
+    _validationListeners.remove(listener);
   }
 
   /// Returns the `FieldController<T>` for the specified field.
@@ -350,13 +395,15 @@ class FormController {
           .map((entry) => MapEntry(entry.key, entry.value.error!)),
     );
   }
-  List<Key?> get errorsKeys{
+
+  List<Key?> get errorsKeys {
     return _fields.entries
         .where((entry) => entry.value.error != null)
-        .map((entry) => entry.value.key).toList();
+        .map((entry) => entry.value.key)
+        .toList();
   }
 
-  Key? get firstFieldKey{
+  Key? get firstFieldKey {
     return _fields.isNotEmpty ? _fields.entries.first.value.key : null;
   }
 
@@ -366,6 +413,7 @@ class FormController {
         .map((entry) => entry.value.focusNode)
         .firstOrNull;
   }
+
   /// Scrolls to the first input field.
   ///
   /// This method retrieves the first `FocusNode` from `_fields`
@@ -383,7 +431,6 @@ class FormController {
     firstNode.requestFocus();
   }
 
-
   /// Scrolls to the first field with an error.
   ///
   /// This method searches for the first `FocusNode` in `_fields` that has an error
@@ -399,8 +446,8 @@ class FormController {
         curve: Curves.easeInOut,
       );
       errorNode.requestFocus();
-    }else{
-      if(debug){
+    } else {
+      if (debug) {
         print('getErrorFocusNode not found');
       }
     }

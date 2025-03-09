@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_form_example/pages/test_form_page.dart';
+import 'package:go_form_example/pages/validate_listener_page.dart';
 
 import '../forms/forms.dart';
 import 'big_list_page.dart';
@@ -102,6 +103,18 @@ class _HomePageState extends State<HomePage> {
               );
             },
             child: Text('big list'),
+
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ValidateListenerPage(),
+                ),
+              );
+            },
+            child: Text('Validate Page'),
 
           ),
         ],

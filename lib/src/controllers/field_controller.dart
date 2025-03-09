@@ -42,8 +42,7 @@ class FieldController<T> extends ChangeNotifier {
   final ValueNotifier<FormFieldData<T?>> _valueNotifier;
   final List<VoidCallback> _listeners = [];
 
-
-  FieldController( {
+  FieldController({
     T? initialValue,
     String? Function(T?)? validator,
     this.key,
@@ -115,7 +114,6 @@ class FieldController<T> extends ChangeNotifier {
     _valueNotifier.dispose();
     _textEditingController?.dispose();
     _listeners.clear();
-
   }
 
   void clearError() {
@@ -147,5 +145,15 @@ class FieldController<T> extends ChangeNotifier {
     notifyListeners();
 
     return null;
+  }
+
+  bool silentValidate() {
+    if (_valueNotifier.value.validator != null) {
+      final validationError = _valueNotifier.value.validator!.call(value);
+      if (validationError != null) {
+        return false;
+      }
+    }
+    return true;
   }
 }

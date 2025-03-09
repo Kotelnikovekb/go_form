@@ -1,3 +1,13 @@
+## [1.2.0] - 2025-03-09
+### New Features
+- Added methods for subscribing to form validation state changes:
+  - `addValidationListener(void Function(bool) listener)` – allows subscribing to form validation state changes (valid/invalid).
+  - `removeValidationListener(void Function(bool) listener)` – removes a previously added validation listener.
+
+- Added a new method in `FieldController`:
+  - `silentValidate()` – performs field validation **without setting an error** and returns `true` if the field is valid or `false` if there is an error.
+
+
 ## [1.1.0] - 2025-02-28
 ### Added
 - **Getter `errorsKey`**: Returns a `List<Key?>` containing all elements with validation errors.
@@ -27,7 +37,7 @@ scrollToFirstField();
 - **Enhanced handling of `key` properties** – fields can now use keys for better identification.
 - **Optimized UI re-rendering** – reduced unnecessary rebuilds.
 
-### 🐞 Bug Fixes
+### Bug Fixes
 - Fixed memory leak issues related to `dispose()`.
 - Fixed test failures caused by missing `key` properties.
 - Improved error handling in form validation.
