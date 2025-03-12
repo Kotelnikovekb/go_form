@@ -1,3 +1,9 @@
+## [1.3.0] - 2025-03-12
+### New Features
+- Added `addFieldValueListener(void Function(String, dynamic) listener)` to `FormController`.
+- Added `removeFieldValueListener(void Function(String, dynamic) listener)` to `FormController`.
+- Now `addTextField` automatically notifies listeners when field values change.
+
 ## [1.2.0] - 2025-03-09
 ### New Features
 - Added methods for subscribing to form validation state changes:

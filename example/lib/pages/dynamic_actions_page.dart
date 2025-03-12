@@ -21,6 +21,9 @@ class _DynamicActionsPageState extends State<DynamicActionsPage> {
       print('${_formController.getValues()}');
 
     });
+    _formController.addFieldValueListener((name,v){
+      print('${name} - $v');
+    });
   }
 
   @override

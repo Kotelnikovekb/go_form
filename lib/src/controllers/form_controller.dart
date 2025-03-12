@@ -38,7 +38,6 @@ class FormController {
   bool _lastValidationState = false;
   bool _isValidationRunning = false;
 
-
   /// Determines whether validation should trigger on field value changes.
   ///
   /// If `true`, validation runs automatically when a field's value changes.
@@ -48,7 +47,7 @@ class FormController {
   final ErrorResetMode errorResetMode;
 
   /// Enables debug mode (throws exceptions if fields are missing).
-  bool debug;
+  bool _debug;
 
   /// Creates a new `FormController`.
   ///
@@ -56,11 +55,12 @@ class FormController {
   /// - `debug` enables debug mode for strict field validation.
   FormController({
     this.errorResetMode = ErrorResetMode.resetOnFocus,
-    this.debug = false,
-  });
+    bool debug = false,
+  }) : _debug = debug;
 
   final List<VoidCallback> _listeners = [];
   final List<void Function(bool)> _validationListeners = [];
+  final List<void Function(String, dynamic)> _fieldValueListeners = [];
 
   /// Registers a new text field in the form and returns its `FieldController<T>`.
   ///
@@ -105,6 +105,10 @@ class FormController {
       _fields[name]!.addListener(() {
         _notifyListeners();
         _silentValidate();
+
+        for (final listener in _fieldValueListeners) {
+          listener(name, _fields[name]!.value);
+        }
       });
     }
 
@@ -200,12 +204,64 @@ class FormController {
     _listeners.remove(listener);
   }
 
+  /// Adds a listener that gets notified when the form's validation state changes.
+  ///
+  /// The listener receives a `bool` indicating whether the form is valid.
+  ///
+  /// Example:
+  /// ```dart
+  /// formController.addValidationListener((isValid) {
+  ///   print('Form is valid: $isValid');
+  /// });
+  /// ```
   void addValidationListener(void Function(bool) listener) {
     _validationListeners.add(listener);
   }
 
+  /// Removes a previously added validation listener.
+  ///
+  /// If the listener is not found, nothing happens.
+  ///
+  /// Example:
+  /// ```dart
+  /// void Function(bool) listener = (isValid) => print('Form is valid: $isValid');
+  /// formController.addValidationListener(listener);
+  ///
+  /// formController.removeValidationListener(listener); // Listener is now removed
+  /// ```
   void removeValidationListener(void Function(bool) listener) {
     _validationListeners.remove(listener);
+  }
+
+  /// Adds a listener that gets notified whenever a field value changes.
+  ///
+  /// The listener receives the field name and its new value.
+  ///
+  /// Example:
+  /// ```dart
+  /// formController.addFieldValueListener((name, value) {
+  ///   print('Field $name changed to: $value');
+  /// });
+  /// ```
+  void addFieldValueListener(
+      void Function(String name, dynamic value) listener) {
+    _fieldValueListeners.add(listener);
+  }
+
+  /// Removes a previously added field value change listener.
+  ///
+  /// If the listener is not found, nothing happens.
+  ///
+  /// Example:
+  /// ```dart
+  /// void Function(String, dynamic) listener = (name, value) => print('Field $name changed to: $value');
+  /// formController.addFieldValueListener(listener);
+  ///
+  /// formController.removeFieldValueListener(listener); // Listener is now removed
+  /// ```
+  void removeFieldValueListener(
+      void Function(String name, dynamic value) listener) {
+    _fieldValueListeners.remove(listener);
   }
 
   /// Returns the `FieldController<T>` for the specified field.
@@ -270,7 +326,7 @@ class FormController {
   /// formController.setValue('email', 'test@example.com');
   /// ```
   void setValue(String name, dynamic value) {
-    if (debug) {
+    if (_debug) {
       if (_fields[name] == null) {
         throw ArgumentError("Field '$name' not found");
       }
@@ -447,7 +503,7 @@ class FormController {
       );
       errorNode.requestFocus();
     } else {
-      if (debug) {
+      if (_debug) {
         print('getErrorFocusNode not found');
       }
     }
