@@ -41,6 +41,7 @@ class FieldController<T> extends ChangeNotifier {
   T? get value => _valueNotifier.value.value.value;
   final ValueNotifier<FormFieldData<T?>> _valueNotifier;
   final List<VoidCallback> _listeners = [];
+  final FocusNode _focusNode = FocusNode();
 
   FieldController({
     T? initialValue,
@@ -109,11 +110,12 @@ class FieldController<T> extends ChangeNotifier {
 
   @override
   void dispose() {
-    super.dispose();
     _valueNotifier.value.dispose();
     _valueNotifier.dispose();
     _textEditingController?.dispose();
     _listeners.clear();
+    _focusNode.dispose();
+    super.dispose();
   }
 
   void clearError() {
@@ -129,7 +131,7 @@ class FieldController<T> extends ChangeNotifier {
 
   ValueListenable<FormFieldData<T?>> get valueListenable => _valueNotifier;
 
-  FocusNode get focusNode => _valueNotifier.value.focusNode;
+  FocusNode get focusNode => _focusNode;
 
   String? validate() {
     if (_valueNotifier.value.validator != null) {

@@ -8,6 +8,12 @@ enum ErrorResetMode {
   noReset,
 }
 
+enum ValidationMode{
+  valueChange,
+  focusChange,
+  noValidate,
+}
+
 /// Manages the state, validation, and interaction of form fields.
 ///
 /// `FormController` provides a centralized way to handle form fields,
@@ -60,7 +66,8 @@ class FormController {
 
   final List<VoidCallback> _listeners = [];
   final List<void Function(bool)> _validationListeners = [];
-  final List<void Function(String, dynamic)> _fieldValueListeners = [];
+  final List<void Function(String name, dynamic value)> _fieldValueListeners = [];
+  final List<void Function(String name, FocusNode focusNode)> _fieldFocusListeners = [];
 
   /// Registers a new text field in the form and returns its `FieldController<T>`.
   ///
@@ -122,6 +129,20 @@ class FormController {
         resetError(name);
       }
     });
+    field.focusNode.addListener(() {
+      final hasFocus = field.focusNode.hasFocus;
+      for (final listener in _fieldFocusListeners) {
+        listener(name, field.focusNode);
+      }
+
+      if (validateOnFieldChange && !hasFocus) {
+        _validateField(name);
+      }
+      if (errorResetMode == ErrorResetMode.resetOnFocus && hasFocus) {
+        resetError(name);
+      }
+    });
+
 
     return field as FieldController<T>;
   }
@@ -158,6 +179,15 @@ class FormController {
     }
     return true;
   }
+
+  void addFocusListener(void Function(String name, FocusNode focusNode) listener) {
+    _fieldFocusListeners.add(listener);
+  }
+
+  void removeFocusListener(void Function(String name, FocusNode focusNode) listener) {
+    _fieldFocusListeners.remove(listener);
+  }
+
 
   /// Checks if there are any registered listeners.
   ///
@@ -585,6 +615,7 @@ class FormController {
     }
     _fields.clear();
     _listeners.clear();
+    _fieldFocusListeners.clear();
   }
 
   /// Clears validation errors for all form fields.

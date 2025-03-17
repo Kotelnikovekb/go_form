@@ -1,3 +1,13 @@
+## [1.4.0] - 2025-03-17
+### Added
+- Added new methods in `FormController`:
+  - `addFieldFocusListener(void Function(String name, bool hasFocus) listener)` — adds a focus change listener.
+  - `removeFieldFocusListener(void Function(String name, bool hasFocus) listener)` — removes a focus change listener.
+### Changed
+- Moved `FocusNode` storage from `FormFieldData` to `FieldController` to prevent it from being recreated when data updates.
+- `FocusNode` is now created once in `FieldController` and managed at the field level, improving focus stability.
+
+
 ## [1.3.0] - 2025-03-12
 ### New Features
 - Added `addFieldValueListener(void Function(String, dynamic) listener)` to `FormController`.
