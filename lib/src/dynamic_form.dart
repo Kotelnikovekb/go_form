@@ -81,6 +81,7 @@ class DynamicForm extends StatelessWidget {
         (index) {
           final field = fields[index ~/ 2];
           final controller = field.addToController(this.controller);
+          field.onInit(controller);
 
           if (index.isEven) {
             return ValueListenableBuilder(

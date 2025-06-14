@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_form_example/pages/test_form_page.dart';
 import 'package:go_form_example/pages/validate_listener_page.dart';
+import 'package:go_form_example/pages/value_listener.dart';
 
 import '../forms/forms.dart';
 import 'big_list_page.dart';
@@ -8,6 +9,7 @@ import 'dynamic_actions_page.dart';
 import 'focus_listener_page.dart';
 import 'form_page.dart';
 import 'init_values_page.dart';
+import 'onInit_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -55,7 +57,6 @@ class _HomePageState extends State<HomePage> {
               );
             },
             child: Text('Registration'),
-
           ),
           ElevatedButton(
             onPressed: () {
@@ -67,9 +68,7 @@ class _HomePageState extends State<HomePage> {
               );
             },
             child: Text('Dynamic Actions'),
-
           ),
-
           ElevatedButton(
             onPressed: () {
               Navigator.push(
@@ -80,7 +79,6 @@ class _HomePageState extends State<HomePage> {
               );
             },
             child: Text('Init values'),
-
           ),
           ElevatedButton(
             onPressed: () {
@@ -92,7 +90,6 @@ class _HomePageState extends State<HomePage> {
               );
             },
             child: Text('Test'),
-
           ),
           ElevatedButton(
             onPressed: () {
@@ -104,7 +101,6 @@ class _HomePageState extends State<HomePage> {
               );
             },
             child: Text('big list'),
-
           ),
           ElevatedButton(
             onPressed: () {
@@ -116,7 +112,6 @@ class _HomePageState extends State<HomePage> {
               );
             },
             child: Text('Validate Page'),
-
           ),
           ElevatedButton(
             onPressed: () {
@@ -128,7 +123,28 @@ class _HomePageState extends State<HomePage> {
               );
             },
             child: Text('Focus listener'),
-
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => OninitPage(),
+                ),
+              );
+            },
+            child: Text('OninitPage'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ValueListenerPage(),
+                ),
+              );
+            },
+            child: Text('ValueListenerPage'),
           ),
         ],
       ),

@@ -105,4 +105,9 @@ abstract class FormFieldModelBase<T> {
       key: key,
     );
   }
+
+  /// Called once when the field is initialized in the form.
+  /// Can be overridden for custom logic (e.g., async loading, side effects).
+  @mustCallSuper
+  void onInit(FieldController<T> controller) {}
 }

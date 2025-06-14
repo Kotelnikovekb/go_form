@@ -1,3 +1,11 @@
+## [1.5.0] - 2025-06-14
+### Added
+- Added `onInit(FieldController<T>)` method to `FormFieldModelBase`, which is called once when the field is initialized in the form.
+- Useful for custom one-time field logic (e.g., preloading data, triggering async calls).
+
+### Fixed
+- `addFieldValueListener` now triggers only on real value changes, not during validation.
+
 ## [1.4.0] - 2025-03-17
 ### Added
 - Added new methods in `FormController`:

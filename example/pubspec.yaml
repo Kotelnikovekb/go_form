@@ -29,6 +29,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   mask_text_input_formatter: ^2.9.0
+  webview_flutter: ^4.13.0
 
 dev_dependencies:
   integration_test:

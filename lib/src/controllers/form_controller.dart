@@ -109,12 +109,17 @@ class FormController {
         validator: validator,
         key: key,
       );
-      _fields[name]!.addListener(() {
+      final field = _fields[name]!;
+      T? lastValue = field.value;
+      field.addListener(() {
         _notifyListeners();
         _silentValidate();
 
-        for (final listener in _fieldValueListeners) {
-          listener(name, _fields[name]!.value);
+        if (field.value != lastValue) {
+          lastValue = field.value;
+          for (final listener in _fieldValueListeners) {
+            listener(name, field.value);
+          }
         }
       });
     }

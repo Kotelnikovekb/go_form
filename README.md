@@ -152,6 +152,25 @@ class GoTextInput extends FormFieldModelBase<String> {
 }
 ```
 
+### One-Time Initialization (`onInit`)
+
+You can override the `onInit` method inside your custom field to perform one-time setup logic.  
+This is useful for asynchronous operations, such as fetching initial data or triggering a service.
+
+```dart
+class MyCustomField extends FormFieldModelBase<String> {
+  @override
+  void onInit(FieldController<String> controller) {
+    controller.setValue('initial_value');
+  }
+
+  @override
+  Widget build(BuildContext context, FieldController<String> controller) {
+    // widget build logic here
+  }
+}
+```
+
 # About the author
 My telegram channel - [@kotelnikoff_dev](https://t.me/kotelnikoff_dev)
 ### Contributions
