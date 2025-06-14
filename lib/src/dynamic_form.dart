@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_form/go_form.dart';
 
-import 'domain/domain.dart';
-import 'controllers/form_controller.dart';
 
 /// A dynamic form widget that automatically generates form fields based on the provided list.
 ///
@@ -39,7 +38,9 @@ import 'controllers/form_controller.dart';
 ///
 /// The widget uses a `Column` to arrange fields, inserting either a fixed space (`fieldSpacing`)
 /// or a widget provided by `separatorBuilder` between them.
-class DynamicForm extends StatelessWidget {
+///
+///
+class DynamicForm extends StatefulWidget {
   /// The list of form fields to be rendered.
   final List<FormFieldModelBase<dynamic>> fields;
 
@@ -71,35 +72,49 @@ class DynamicForm extends StatelessWidget {
   }) : fieldSpacing = 0.0;
 
   @override
+  State<DynamicForm> createState() => _DynamicFormState();
+}
+
+class _DynamicFormState extends State<DynamicForm> {
+  late final List<({FormFieldModelBase field, FieldController controller})> _entries;
+
+  @override
+  void initState() {
+    super.initState();
+    _entries = widget.fields.map((field) {
+      final controller = field.addToController(widget.controller);
+      field.onInit(controller);
+      return (field: field, controller: controller);
+    }).toList();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (fields.isEmpty) {
+    if (_entries.isEmpty) {
       return const SizedBox();
     }
     return Column(
       children: List.generate(
-        fields.length * 2 - 1,
+        _entries.length * 2 - 1,
         (index) {
-          final field = fields[index ~/ 2];
-          final controller = field.addToController(this.controller);
-          field.onInit(controller);
-
           if (index.isEven) {
+            final entry = _entries[index ~/ 2];
             return ValueListenableBuilder(
-              valueListenable: controller.valueListenable,
+              valueListenable: entry.controller.valueListenable,
               builder: (context, fieldData, child) {
                 return Focus(
-                  key: field.key,
-                  focusNode: controller.focusNode,
-                  child: field.build(
+                  key: entry.field.key,
+                  focusNode: entry.controller.focusNode,
+                  child: entry.field.build(
                     context,
-                    controller,
+                    entry.controller,
                   ),
                 );
               },
             );
           } else {
-            return separatorBuilder?.call(context, index) ??
-                SizedBox(height: fieldSpacing);
+            return widget.separatorBuilder?.call(context, index) ??
+                SizedBox(height: widget.fieldSpacing);
           }
         },
       ),

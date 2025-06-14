@@ -1,3 +1,8 @@
+## [1.5.1] - 2025-06-14
+### Changed
+- Refactored `DynamicForm` to be a `StatefulWidget`, allowing controller initialization and `onInit` to be called once during `initState()`.
+- Improved performance by avoiding repeated `addToController` and `onInit` calls during every `build`.
+
 ## [1.5.0] - 2025-06-14
 ### Added
 - Added `onInit(FieldController<T>)` method to `FormFieldModelBase`, which is called once when the field is initialized in the form.
