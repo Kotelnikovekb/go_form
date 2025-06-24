@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_form/go_form.dart';
 import 'package:go_form_example/inputs/root_input.dart';
 
 class GoTextInput extends FormFieldModelBase<String> {
   final String label;
+  final Widget? prefix;
+  final List<TextInputFormatter>? inputFormatters;
+  final TextInputType? keyboardType;
 
   GoTextInput({
     required super.name,
     super.validator,
     required this.label,
+    this.prefix,
+    this.inputFormatters,
+    this.keyboardType,
   });
 
   @override
@@ -19,6 +26,8 @@ class GoTextInput extends FormFieldModelBase<String> {
       validator: validator,
       errorText: controller.error,
       labelText: label,
+      prefix: prefix,
+      inputFormatters: inputFormatters,
     );
   }
 }

@@ -76,7 +76,7 @@ class DynamicForm extends StatefulWidget {
 }
 
 class _DynamicFormState extends State<DynamicForm> {
-  late final List<({FormFieldModelBase field, FieldController controller})> _entries;
+  late List<({FormFieldModelBase field, FieldController controller})> _entries;
 
   @override
   void initState() {
@@ -100,6 +100,7 @@ class _DynamicFormState extends State<DynamicForm> {
       }).toList();
       setState(() {});
     }
+    setState(() {});
   }
 
   @override

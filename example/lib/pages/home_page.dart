@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_form_example/pages/phone_and_country.dart';
 import 'package:go_form_example/pages/test_form_page.dart';
 import 'package:go_form_example/pages/validate_listener_page.dart';
 import 'package:go_form_example/pages/value_listener.dart';
@@ -145,6 +146,17 @@ class _HomePageState extends State<HomePage> {
               );
             },
             child: Text('ValueListenerPage'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PhoneAndCountry(),
+                ),
+              );
+            },
+            child: Text('PhoneAndCountry'),
           ),
         ],
       ),

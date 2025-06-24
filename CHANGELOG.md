@@ -1,3 +1,6 @@
+## [1.5.3] - 2025-06-14
+- bug fix
+
 ## [1.5.2] - 2025-06-14
 ### Fixed
 - Migrated DynamicForm from StatelessWidget to StatefulWidget to support local state handling.

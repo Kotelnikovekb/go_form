@@ -78,7 +78,7 @@ class _DynamicActionsPageState extends State<DynamicActionsPage> {
             onPressed: () {
               print(_formController.getFieldValue<String>('text'));
             },
-            child: Text('Очистить поля'),
+            child: Text('Значение поля'),
           ),
         ],
       ),

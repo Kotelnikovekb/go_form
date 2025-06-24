@@ -14,13 +14,14 @@ class RootInput extends TextFormField {
     super.obscureText,
     super.inputFormatters,
     super.controller,
+    Widget? prefix,
   }) : super(
           decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            errorText: errorText,
-            labelText: labelText,
-            prefixIcon: prefixIcon,
-            suffixIcon: suffixIcon,
-          ),
+              border: const OutlineInputBorder(),
+              errorText: errorText,
+              labelText: labelText,
+              prefixIcon: prefixIcon,
+              suffixIcon: suffixIcon,
+              prefix: prefix),
         );
 }
