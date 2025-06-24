@@ -1,3 +1,8 @@
+## [1.5.2] - 2025-06-14
+### Fixed
+- Migrated DynamicForm from StatelessWidget to StatefulWidget to support local state handling.
+- lemented didUpdateWidget to properly refresh field entries when fields or controller change.
+
 ## [1.5.1] - 2025-06-14
 ### Changed
 - Refactored `DynamicForm` to be a `StatefulWidget`, allowing controller initialization and `onInit` to be called once during `initState()`.

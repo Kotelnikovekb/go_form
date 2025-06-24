@@ -89,6 +89,20 @@ class _DynamicFormState extends State<DynamicForm> {
   }
 
   @override
+  void didUpdateWidget(covariant DynamicForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.fields != oldWidget.fields || widget.controller != oldWidget.controller) {
+      _entries = widget.fields.map((field) {
+        final controller = field.addToController(widget.controller);
+        field.onInit(controller);
+        return (field: field, controller: controller);
+      }).toList();
+      setState(() {});
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (_entries.isEmpty) {
       return const SizedBox();
