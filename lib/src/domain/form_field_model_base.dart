@@ -64,17 +64,27 @@ abstract class FormFieldModelBase<T> {
   /// An optional `Key` used for widget identification in tests and rendering optimizations.
   final Key? key;
 
+  /// Optional debounce duration for input changes.
+  final Duration? debounceDuration;
+
+  /// Optional async validator for the field.
+  final Future<String?> Function(T?)? asyncValidator;
+
   /// Constructor for creating a form field.
   ///
   /// - `name` – Required unique name for the field.
   /// - `initialValue` – Optional default value.
   /// - `validator` – Function to validate the field's input.
+  /// - `asyncValidator` – Async function to validate the field's input.
   /// - `key` – Optional key for testing and performance optimization.
+  /// - `debounceDuration` – Optional debounce duration for input changes.
   const FormFieldModelBase({
     required this.name,
     this.initialValue,
     this.validator,
+    this.asyncValidator,
     this.key,
+    this.debounceDuration,
   });
 
   /// Abstract method that must be implemented to define the UI of the field.
@@ -102,7 +112,9 @@ abstract class FormFieldModelBase<T> {
       name: name,
       initialValue: initialValue,
       validator: validator,
+      asyncValidator: asyncValidator,
       key: key,
+      debounceDuration: debounceDuration,
     );
   }
 

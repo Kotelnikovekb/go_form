@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'field_controller.dart';
@@ -8,7 +9,7 @@ enum ErrorResetMode {
   noReset,
 }
 
-enum ValidationMode{
+enum ValidationMode {
   valueChange,
   focusChange,
   noValidate,
@@ -47,13 +48,13 @@ class FormController {
   /// Determines whether validation should trigger on field value changes.
   ///
   /// If `true`, validation runs automatically when a field's value changes.
-  bool validateOnFieldChange = false;
+  final bool validateOnFieldChange = false;
 
   /// Defines when errors should be reset (`resetOnFocus`, `resetOnValueChange`, `noReset`).
   final ErrorResetMode errorResetMode;
 
   /// Enables debug mode (throws exceptions if fields are missing).
-  bool _debug;
+  final bool _debug;
 
   /// Creates a new `FormController`.
   ///
@@ -66,8 +67,10 @@ class FormController {
 
   final List<VoidCallback> _listeners = [];
   final List<void Function(bool)> _validationListeners = [];
-  final List<void Function(String name, dynamic value)> _fieldValueListeners = [];
-  final List<void Function(String name, FocusNode focusNode)> _fieldFocusListeners = [];
+  final List<void Function(String name, dynamic value)> _fieldValueListeners =
+      [];
+  final List<void Function(String name, FocusNode focusNode)>
+      _fieldFocusListeners = [];
 
   /// Registers a new text field in the form and returns its `FieldController<T>`.
   ///
@@ -101,13 +104,17 @@ class FormController {
     required String name,
     T? initialValue,
     String? Function(T?)? validator,
+    Future<String?> Function(T?)? asyncValidator,
     Key? key,
+    Duration? debounceDuration,
   }) {
     if (!_fields.containsKey(name)) {
       _fields[name] = FieldController<T>(
         initialValue: initialValue,
         validator: validator,
+        asyncValidator: asyncValidator,
         key: key,
+        debounceDuration: debounceDuration,
       );
       final field = _fields[name]!;
       T? lastValue = field.value;
@@ -148,7 +155,6 @@ class FormController {
       }
     });
 
-
     return field as FieldController<T>;
   }
 
@@ -185,14 +191,15 @@ class FormController {
     return true;
   }
 
-  void addFocusListener(void Function(String name, FocusNode focusNode) listener) {
+  void addFocusListener(
+      void Function(String name, FocusNode focusNode) listener) {
     _fieldFocusListeners.add(listener);
   }
 
-  void removeFocusListener(void Function(String name, FocusNode focusNode) listener) {
+  void removeFocusListener(
+      void Function(String name, FocusNode focusNode) listener) {
     _fieldFocusListeners.remove(listener);
   }
-
 
   /// Checks if there are any registered listeners.
   ///
@@ -536,9 +543,8 @@ class FormController {
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
       );
-      errorNode.requestFocus();
     } else {
-      if (_debug) {
+      if (_debug && kDebugMode) {
         print('getErrorFocusNode not found');
       }
     }
@@ -586,8 +592,47 @@ class FormController {
       if (error != null) {
         field.setError(error);
         isValid = false;
+        if (_debug && kDebugMode) {
+          print('fild $name - has error $error');
+        }
+      } else {
+        if (_debug && kDebugMode) {
+          print('fild $name - ok');
+        }
       }
     });
+    return isValid;
+  }
+
+  /// Validates all form fields asynchronously.
+  ///
+  /// This method awaits the result of each field's async validator.
+  /// If any validator returns a non-null error, it will be stored and the form is considered invalid.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final isValid = await formController.validateAsync();
+  /// if (!isValid) {
+  ///   print(formController.errors); // Display errors
+  /// }
+  /// ```
+  Future<bool> validateAsync() async {
+    bool isValid = true;
+    resetAllErrors();
+    for (final entry in _fields.entries) {
+      final field = entry.value;
+      final result = await field.validateAsync();
+      if (result != null) {
+        isValid = false;
+        if (_debug && kDebugMode) {
+          print('Field ${entry.key} - has async error $result');
+        }
+      } else {
+        if (_debug && kDebugMode) {
+          print('Field ${entry.key} - async ok');
+        }
+      }
+    }
     return isValid;
   }
 
@@ -682,5 +727,128 @@ class FormController {
   /// - **Returns**: The current value of the field, or `null` if the field is not found.
   T? getFieldValue<T>(String name) {
     return _fields[name]?.value as T?;
+  }
+
+
+  /// Moves focus to the field with the specified name.
+  ///
+  /// This method uses the field's [FocusNode] to request focus. It is useful for
+  /// programmatically setting focus based on field name.
+  ///
+  /// If the field is not found or its [FocusNode] has no context (i.e., not attached to the widget tree),
+  /// the method does nothing.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// formController.focus('email');
+  /// ```
+  ///
+  /// - [name] — the name of the field to focus.
+  void focus(String name) {
+    final node = _fields[name]?.focusNode;
+    if (node != null && node.context != null) {
+      FocusScope.of(node.context!).requestFocus(node);
+    }
+    else{
+      if(_debug){
+        if (kDebugMode) {
+          print('node: ${node != null } context: ${node?.context != null}');
+        }
+      }
+    }
+  }
+
+  /// Removes focus from the field with the given name.
+  ///
+  /// If the field exists, its [FocusNode] will be unfocused.
+  ///
+  /// - [name] — the name of the field.
+  void unfocus(String name) {
+    _fields[name]?.focusNode.unfocus();
+  }
+
+  /// Checks whether the specified field currently has focus.
+  ///
+  /// - [name] — the name of the field.
+  /// - Returns `true` if the field is focused, otherwise `false`.
+  bool hasFocus(String name) {
+    return _fields[name]?.focusNode.hasFocus ?? false;
+  }
+
+  /// Moves focus to the next field after the current one.
+  ///
+  /// Fields are ordered by their insertion order. If the current field is found,
+  /// focus will be moved to the next field if available.
+  ///
+  /// - [currentName] — the name of the current field.
+  void focusNext(String currentName) {
+    final keys = _fields.keys.toList();
+    final currentIndex = keys.indexOf(currentName);
+    if (currentIndex != -1 && currentIndex + 1 < keys.length) {
+      final nextName = keys[currentIndex + 1];
+      focus(nextName);
+    }
+  }
+
+  /// Moves focus to the previous field before the current one.
+  ///
+  /// Fields are ordered by their insertion order. If the current field is found,
+  /// focus will be moved to the previous field if available.
+  ///
+  /// - [currentName] — the name of the current field.
+  void focusPrevious(String currentName) {
+    final keys = _fields.keys.toList();
+    final currentIndex = keys.indexOf(currentName);
+    if (currentIndex > 0) {
+      final previousName = keys[currentIndex - 1];
+      focus(previousName);
+    }else{
+      if(_debug){
+        if (kDebugMode) {
+          print('currentIndex null');
+        }
+      }
+    }
+  }
+
+  /// Checks whether the specified field currently has a validation error.
+  ///
+  /// Returns `true` if an error is set for the field, otherwise `false`.
+  ///
+  /// ### Example Usage:
+  /// ```dart
+  /// bool hasError = formController.hasError('email');
+  /// if (hasError) {
+  ///   print('Email field has an error.');
+  /// }
+  /// ```
+  ///
+  /// - [name] — the name of the field to check.
+  bool hasError(String name) {
+    return _fields[name]?.error != null;
+  }
+
+  /// Moves focus to the first field that contains a validation error.
+  ///
+  /// This method scans all registered fields in their insertion order
+  /// and focuses the first one that has a non-null error message.
+  ///
+  /// If no field has an error, nothing happens.
+  ///
+  /// ### Example Usage:
+  /// ```dart
+  /// formController.validate(); // Populate errors
+  /// formController.focusFirstError(); // Focus first errored field
+  /// ```
+  void focusFirstError() {
+    for (final entry in _fields.entries) {
+      if (entry.value.error != null) {
+        final node = entry.value.focusNode;
+        if (node.context != null) {
+          FocusScope.of(node.context!).requestFocus(node);
+        }
+        break;
+      }
+    }
   }
 }

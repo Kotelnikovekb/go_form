@@ -1,3 +1,26 @@
+## [1.6.0] - 2025-06-27
+### Added
+- Added new focus control methods in `FormController`:
+  - `focus(String name)` – focuses the field with the given name.
+  - `unfocus(String name)` – removes focus from the specified field.
+  - `unfocusAll()` – removes focus from all fields.
+  - `focusNext(String name)` – moves focus to the next field.
+  - `focusPrevious(String name)` – moves focus to the previous field.
+  - `focusFirstError()` – focuses the first field that has a validation error.
+  - `hasFocus(String name)` – returns `true` if the field is currently focused.
+  - `hasError(String name)` – returns `true` if the field currently has a validation error.
+- Added support for debounced value changes via `debounceDuration` in `FieldController`.
+- Added `validateAsync()` method in `FieldController` and `FormController` for asynchronous validation.
+- Added `asyncValidator` property in `FormFieldModelBase` and `FormController` to support field-level async validation logic.
+
+### Fixed
+- Fixed an issue where `FocusNode` state could be lost during `DynamicForm` rebuilds.
+- Improved compatibility with `scrollToFirstErrorField()` — it now reliably focuses the first field with a validation error.
+- Fixed a bug with recursive `Focus` wrapping that triggered `child != this` assertion errors.
+- Added `isFocusHandledExternally` flag to `FieldController` to allow external management of focus nodes.
+- Updated the example: added a form demonstrating automatic focus on the first error field.
+- Fixed field rebuild behavior when using debounce; fields no longer lose state on delayed input.
+
 ## [1.5.3] - 2025-06-14
 - bug fix
 

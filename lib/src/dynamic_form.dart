@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_form/go_form.dart';
 
-
 /// A dynamic form widget that automatically generates form fields based on the provided list.
 ///
 /// The `DynamicForm` widget takes a list of `FormFieldModelBase` objects and builds a form
@@ -92,7 +91,8 @@ class _DynamicFormState extends State<DynamicForm> {
   void didUpdateWidget(covariant DynamicForm oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.fields != oldWidget.fields || widget.controller != oldWidget.controller) {
+    if (widget.fields != oldWidget.fields ||
+        widget.controller != oldWidget.controller) {
       _entries = widget.fields.map((field) {
         final controller = field.addToController(widget.controller);
         field.onInit(controller);
@@ -117,14 +117,12 @@ class _DynamicFormState extends State<DynamicForm> {
             return ValueListenableBuilder(
               valueListenable: entry.controller.valueListenable,
               builder: (context, fieldData, child) {
-                return Focus(
-                  key: entry.field.key,
-                  focusNode: entry.controller.focusNode,
-                  child: entry.field.build(
-                    context,
-                    entry.controller,
-                  ),
-                );
+                final fieldWidget =
+                    entry.field.build(context, entry.controller);
+                if (entry.controller.focusNode.context != null) {
+                  return fieldWidget;
+                }
+                return fieldWidget;
               },
             );
           } else {

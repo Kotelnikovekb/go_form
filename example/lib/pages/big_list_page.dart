@@ -1,8 +1,20 @@
+
 import 'package:flutter/material.dart';
 import 'package:go_form/go_form.dart';
+import '../inputs/go_text_input.dart';
 
-import '../inputs/go_dynamic_input.dart';
-
+/// Example: Big List Form Page
+///
+/// This example demonstrates how to build a scrollable form
+/// with a large number of fields using `DynamicForm` from the `go_form` package.
+///
+/// Key features:
+/// - Validates multiple fields
+/// - Automatically scrolls to the first field with a validation error
+/// - Uses `FormController` and `ScrollController` for managing form and scroll behavior
+///
+/// This page is useful for testing large forms, input performance,
+/// and error handling in vertical layouts.
 class BigListPage extends StatefulWidget {
   const BigListPage({super.key});
 
@@ -18,19 +30,7 @@ class _BigListPageState extends State<BigListPage> {
   void _validateForm() {
     if(!_formController.validate()){
       _formController.scrollToFirstErrorField();
-      /*final errorKey=_formController.errorsKeys.firstWhere((key) => key != null, orElse: () => null);
-      if(errorKey!=null&& errorKey is GlobalKey){
-        final context = errorKey.currentContext;
-        if(context!=null){
-          Scrollable.ensureVisible(
-            context,
-            duration: const Duration(seconds: 1),
-            curve: Curves.easeInOut,
-          );
-        }
-      }else{
-        print('erer errorKey');
-      }*/
+      return;
     }
   }
 
@@ -44,27 +44,25 @@ class _BigListPageState extends State<BigListPage> {
           controller: _scrollController,
           child: DynamicForm(
             fields: [
-              ...List.generate(100, (index){
-                return GoDynamicInput(
-                  key:  GlobalKey(),
+              ...List.generate(10, (index){
+                return GoTextInput(
                   name: 'text$index',
                   label: 'Email',
                   validator: (val) {
                     if (val == null || val.isEmpty) {
-                      return 'Согласись';
+                      return 'Fill in the field';
                     }
                     return null;
                   },
-                  initialValue: 'hello',
+                  initialValue: 'text ${index}',
                 );
               }),
-              GoDynamicInput(
-                key:  GlobalKey(),
+              GoTextInput(
                 name: 'email_error',
                 label: 'Email',
                 validator: (val) {
                   if (val == null || val.isEmpty) {
-                    return 'Согласись';
+                    return 'Fill in the field';
                   }
                   return null;
                 },
@@ -74,12 +72,13 @@ class _BigListPageState extends State<BigListPage> {
           ),
         ),
       ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(10),
-        child: ElevatedButton(
-          key: const Key('validate_button'),
-          onPressed: _validateForm,
-          child: const Text('Validate'),
+      bottomNavigationBar: SafeArea(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: ElevatedButton(
+            onPressed: _validateForm,
+            child: const Text('Validate'),
+          ),
         ),
       ),
     );

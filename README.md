@@ -12,6 +12,7 @@
 - [Quick Start](#quick-start)
   - [Creating a Form with Dynamic Fields](#creating-a-form-with-dynamic-fields)
   - [Validation Check Before Submission](#validation-check-before-submission)
+  - [Focus and Scrolling Example](#focus-and-scrolling-example)
   - [Adding Errors](#adding-errors)
   - [Resetting the Form](#resetting-the-form)
 - [How to Create a Custom Field?](#how-to-create-a-custom-field)
@@ -35,6 +36,24 @@ without the need to manually handle controllers for each field.
   Set and reset errors anywhere in your code,  
   without needing to use `setState()`.  
   Error display is fully automated and updates without unnecessary re-renders.
+
+- **Debounced value changes**  
+  Fields can debounce rapid input changes using `debounceDuration`, reducing unnecessary processing or validations.
+
+- **Asynchronous validation**  
+  Add `asyncValidator` to a field to perform validation that requires waiting for server responses or background checks.  
+  Use `formController.validateAsync()` to trigger validation across all fields.
+
+- **Advanced focus management**  
+  The `FormController` provides built-in methods for controlling focus between fields:  
+  - `focus(String name)` – focuses the field with the given name.  
+  - `unfocus(String name)` – removes focus from the specified field.  
+  - `unfocusAll()` – removes focus from all fields.  
+  - `focusNext(String name)` – moves focus to the next field.  
+  - `focusPrevious(String name)` – moves focus to the previous field.  
+  - `focusFirstError()` – focuses the first field that has a validation error.  
+  - `hasFocus(String name)` – returns `true` if the field is currently focused.  
+  - `hasError(String name)` – returns `true` if the field currently has an error.  
 
 ---  
 
@@ -102,6 +121,62 @@ void onSubmit() {
   }
 }
 ```
+
+### Focus and Scrolling Example
+
+GoForm allows you to programmatically manage focus and scroll behavior:
+
+```dart
+GoTextInput(
+  name: 'email',
+  label: 'Email',
+),
+GoTextInput(
+  name: 'password',
+  label: 'Password',
+),
+```
+
+To move focus to the next field:
+
+```dart
+ElevatedButton(
+  onPressed: () {
+    _formController.focusNext('email');
+  },
+  child: Text('Go to Password'),
+);
+```
+
+To focus the first field with a validation error:
+
+```dart
+ElevatedButton(
+  onPressed: () async {
+    final isValid = await _formController.validateAsync();
+    if (!isValid) {
+      _formController.focusFirstError();
+    }
+  },
+  child: Text('Validate and Focus Error'),
+);
+```
+
+To scroll to the first field with an error:
+
+```dart
+ElevatedButton(
+  onPressed: () async {
+    final isValid = await _formController.validateAsync();
+    if (!isValid) {
+      _formController.scrollToFirstErrorField();
+    }
+  },
+  child: Text('Validate and Scroll to Error'),
+);
+```
+
+`scrollToFirstErrorField()` works with `DynamicForm` and assumes the form is wrapped in a scrollable container (e.g. `SingleChildScrollView`).
 
 ### Adding Errors
 

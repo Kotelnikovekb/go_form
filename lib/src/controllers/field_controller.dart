@@ -34,9 +34,13 @@ import '../domain/domain.dart';
 /// 🔹 `controller.error` – error message if the field is invalid.
 ///
 /// ---
+import 'dart:async';
+
 class FieldController<T> extends ChangeNotifier {
   final Key? key;
   TextEditingController? _textEditingController;
+  Timer? _debounceTimer;
+  Duration? debounceDuration;
 
   T? get value => _valueNotifier.value.value.value;
   final ValueNotifier<FormFieldData<T?>> _valueNotifier;
@@ -46,11 +50,14 @@ class FieldController<T> extends ChangeNotifier {
   FieldController({
     T? initialValue,
     String? Function(T?)? validator,
+    Future<String?> Function(T?)? asyncValidator,
     this.key,
+    this.debounceDuration,
   }) : _valueNotifier = ValueNotifier(
           FormFieldData<T?>(
             initialValue: initialValue,
             validator: validator,
+            asyncValidator: asyncValidator,
           ),
         );
 
@@ -69,6 +76,17 @@ class FieldController<T> extends ChangeNotifier {
   }
 
   void onChange(T? newValue) {
+    if (debounceDuration != null) {
+      _debounceTimer?.cancel();
+      _debounceTimer = Timer(debounceDuration!, () {
+        _applyChange(newValue);
+      });
+    } else {
+      _applyChange(newValue);
+    }
+  }
+
+  void _applyChange(T? newValue) {
     _valueNotifier.value = FormFieldData<T?>(
       initialValue: newValue,
       validator: _valueNotifier.value.validator,
@@ -103,13 +121,12 @@ class FieldController<T> extends ChangeNotifier {
         }
       }
       notifyListeners();
-    } else {
-      print('type ${newValue.runtimeType} not ${T.runtimeType} or null');
     }
   }
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _valueNotifier.value.dispose();
     _valueNotifier.dispose();
     _textEditingController?.dispose();
@@ -146,6 +163,21 @@ class FieldController<T> extends ChangeNotifier {
     }
     notifyListeners();
 
+    return null;
+  }
+
+  Future<String?> validateAsync() async {
+    final asyncValidator = _valueNotifier.value.asyncValidator;
+    if (asyncValidator != null) {
+      final result = await Future.value(asyncValidator.call(value));
+      if (result != null) {
+        setError(result);
+      } else {
+        clearError();
+      }
+      return result;
+    }
+    notifyListeners();
     return null;
   }
 

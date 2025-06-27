@@ -16,10 +16,14 @@ class GoTextInput extends FormFieldModelBase<String> {
     this.prefix,
     this.inputFormatters,
     this.keyboardType,
+    super.key,
+    super.initialValue,
+    super.debounceDuration,
+    super.asyncValidator,
   });
 
   @override
-  Widget build(BuildContext context, FieldController controller) {
+  Widget build(BuildContext context, FieldController<String> controller) {
     return RootInput(
       onChanged: (newValue) => controller.onChange(newValue),
       initialValue: controller.value,
@@ -28,6 +32,7 @@ class GoTextInput extends FormFieldModelBase<String> {
       labelText: label,
       prefix: prefix,
       inputFormatters: inputFormatters,
+      focusNode: controller.focusNode,
     );
   }
 }
