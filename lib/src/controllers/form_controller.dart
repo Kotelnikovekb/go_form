@@ -71,6 +71,7 @@ class FormController {
       [];
   final List<void Function(String name, FocusNode focusNode)>
       _fieldFocusListeners = [];
+  final Map<String, dynamic> _initialValues = {};
 
   /// Registers a new text field in the form and returns its `FieldController<T>`.
   ///
@@ -109,6 +110,7 @@ class FormController {
     Duration? debounceDuration,
   }) {
     if (!_fields.containsKey(name)) {
+      _initialValues[name] = initialValue;
       _fields[name] = FieldController<T>(
         initialValue: initialValue,
         validator: validator,
@@ -729,7 +731,6 @@ class FormController {
     return _fields[name]?.value as T?;
   }
 
-
   /// Moves focus to the field with the specified name.
   ///
   /// This method uses the field's [FocusNode] to request focus. It is useful for
@@ -748,11 +749,10 @@ class FormController {
     final node = _fields[name]?.focusNode;
     if (node != null && node.context != null) {
       FocusScope.of(node.context!).requestFocus(node);
-    }
-    else{
-      if(_debug){
+    } else {
+      if (_debug) {
         if (kDebugMode) {
-          print('node: ${node != null } context: ${node?.context != null}');
+          print('node: ${node != null} context: ${node?.context != null}');
         }
       }
     }
@@ -802,8 +802,8 @@ class FormController {
     if (currentIndex > 0) {
       final previousName = keys[currentIndex - 1];
       focus(previousName);
-    }else{
-      if(_debug){
+    } else {
+      if (_debug) {
         if (kDebugMode) {
           print('currentIndex null');
         }
@@ -850,5 +850,65 @@ class FormController {
         break;
       }
     }
+  }
+
+  /// Returns true if any field value has changed from its initial value.
+  ///
+  /// Useful to detect unsaved changes in the form.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// if (formController.hasChanges()) {
+  ///   // Show confirmation dialog
+  /// }
+  /// ```
+  bool hasChanges() {
+    for (final entry in _fields.entries) {
+      final name = entry.key;
+      final field = entry.value;
+      if (field.value != _initialValues[name]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Resets all form fields to their original initial values.
+  ///
+  /// This method restores the values of all fields to what they were when
+  /// initially registered via `addTextField()`. Useful for undoing changes.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// formController.resetToInitialValues();
+  /// ```
+  void resetToInitialValues() {
+    for (final entry in _fields.entries) {
+      final name = entry.key;
+      final initialValue = _initialValues[name];
+      entry.value.setValue(initialValue);
+    }
+  }
+
+  /// Returns a map of fields that have changed from their initial values.
+  ///
+  /// The returned map contains field names and their current values,
+  /// but only for those fields where the value differs from the initial.
+  ///
+  /// ### Example:
+  /// ```dart
+  /// final changes = formController.getChangedFields();
+  /// print(changes); // {email: 'new@example.com'}
+  /// ```
+  Map<String, dynamic> getChangedFields() {
+    final changed = <String, dynamic>{};
+    for (final entry in _fields.entries) {
+      final name = entry.key;
+      final field = entry.value;
+      if (field.value != _initialValues[name]) {
+        changed[name] = field.value;
+      }
+    }
+    return changed;
   }
 }
