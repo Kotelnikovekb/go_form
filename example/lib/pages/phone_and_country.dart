@@ -62,11 +62,7 @@ class _PhoneAndCountryState extends State<PhoneAndCountry> {
     ),
   ];
 
-  var maskFormatter = MaskTextInputFormatter(
-    mask: '(###) ###-##-##',
-    filter: {"#": RegExp(r'[0-9]')},
-    type: MaskAutoCompletionType.lazy,
-  );
+  late final MaskTextInputFormatter maskFormatter;
 
   late CountryPhoneDto defaultCountry;
 
@@ -77,32 +73,31 @@ class _PhoneAndCountryState extends State<PhoneAndCountry> {
       (c) => c.countryCode == locale,
       orElse: () => countries.first,
     );
+
+    maskFormatter = MaskTextInputFormatter(
+      mask: defaultCountry.phoneMask,
+      filter: {"#": RegExp(r'[0-9]')},
+      type: MaskAutoCompletionType.lazy,
+    );
+
     super.initState();
 
-    formController.addFieldValueListener((f, v) {
-
-      print('$f $v<');
-
-
-      if (f == 'country') {
+    formController.addFieldValueListener((field, value) {
+      if (field == 'country') {
         final country = formController.getFieldValue<CountryPhoneDto>('country');
         formController.setValue('phone', '');
-
-        print(formController.getFieldValue<String>('phone'));
-
-
-        setState(() {
-          maskFormatter.clear();
-          maskFormatter = MaskTextInputFormatter(
-            mask: country?.phoneMask ?? '(###) ###-##-##',
-            filter: {"#": RegExp(r'[0-9]')},
-            type: MaskAutoCompletionType.lazy,
-          );
-        });
-
-        print(formController.getFieldValue<String>('phone'));
-
+        updateMaskFormatter(country ?? defaultCountry);
       }
+    });
+  }
+
+  void updateMaskFormatter(CountryPhoneDto country) {
+    setState(() {
+      maskFormatter = MaskTextInputFormatter(
+        mask: country.phoneMask,
+        filter: {"#": RegExp(r'[0-9]')},
+        type: MaskAutoCompletionType.lazy,
+      );
     });
   }
 
@@ -120,12 +115,12 @@ class _PhoneAndCountryState extends State<PhoneAndCountry> {
               phoneMask: maskFormatter,
               defaultCountry: defaultCountry,
             ),
-            SizedBox(height: 10,),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
-                print(formController.getFieldValue<String>('phone'));
+                debugPrint(formController.getFieldValue<String>('phone'));
               },
-              child: Text('Значение поля'),
+              child: const Text('Значение поля'),
             ),
           ],
         ),
@@ -157,36 +152,23 @@ class _GoPhoneInputState extends State<GoPhoneInput> {
   Widget build(BuildContext context) {
     return Row(
       children: [
+        CountryDropdown(
+          countries: widget.countries,
+          formController: widget.formController,
+          defaultCountry: widget.defaultCountry,
+        ),
+        const SizedBox(width: 8),
         Expanded(
           child: DynamicForm(
             fields: [
               GoTextInput(
-                keyboardType: TextInputType.numberWithOptions(),
-                label: 'autogen_057',
+                keyboardType: const TextInputType.numberWithOptions(),
+                label: 'Телефон',
                 name: 'phone',
-                prefix: Container(
-                  padding: const EdgeInsets.only(right: 10),
-                  child: DynamicForm(
-                    fields: [
-                      CountryCodeSelector(
-                        name: 'country',
-                        countries: widget.countries,
-                        validator: (v) {
-                          if (v == null) {
-                            return 'autogen_058';
-                          }
-                          return null;
-                        },
-                        initialValue: widget.defaultCountry,
-                      )
-                    ],
-                    controller: widget.formController,
-                  ),
-                ),
                 inputFormatters: [widget.phoneMask],
                 validator: (v) {
                   if (v == null || v.isEmpty) {
-                    return 'autogen_058';
+                    return 'Поле обязательно';
                   }
                   return null;
                 },
@@ -196,6 +178,39 @@ class _GoPhoneInputState extends State<GoPhoneInput> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class CountryDropdown extends StatelessWidget {
+  final List<CountryPhoneDto> countries;
+  final FormController formController;
+  final CountryPhoneDto defaultCountry;
+
+  const CountryDropdown({
+    super.key,
+    required this.countries,
+    required this.formController,
+    required this.defaultCountry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DynamicForm(
+      fields: [
+        CountryCodeSelector(
+          name: 'country',
+          countries: countries,
+          validator: (v) {
+            if (v == null) {
+              return 'Поле обязательно';
+            }
+            return null;
+          },
+          initialValue: defaultCountry,
+        )
+      ],
+      controller: formController,
     );
   }
 }
@@ -214,56 +229,60 @@ class CountryCodeSelector extends FormFieldModelBase<CountryPhoneDto> {
   Widget build(
       BuildContext context, FieldController<CountryPhoneDto> controller) {
     return InkWell(
+      onTap: () => _showCountrySelectionSheet(context, controller),
       child: Text(
         '${controller.value?.flagEmoji} ${controller.value?.dialCode}',
       ),
-      onTap: () {
-        showBottomSheet(
-          context: context,
-          builder: (context) {
-            return Container(
-              decoration: BoxDecoration(
-                color: Colors.white
+    );
+  }
+
+  void _showCountrySelectionSheet(
+      BuildContext context, FieldController<CountryPhoneDto> controller) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Выберите страну',
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-              padding: EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Text(
-                    'select_country_title',
-                  ),
-                  SizedBox(height: 10,),
-                  Expanded(
-                      child: ListView.builder(
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: InkWell(
-                          onTap: () {
-                            controller.setValue(countries[index]);
-                            Navigator.of(context).pop();
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                '${countries[index].flagEmoji} ${('country_code_${countries[index].countryCode}')}',
-                              ),
-                              Text(
-                                countries[index].dialCode,
-                              )
-                            ],
-                          ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: countries.length,
+                  itemBuilder: (context, index) {
+                    final country = countries[index];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: InkWell(
+                        onTap: () {
+                          controller.setValue(country);
+                          Navigator.of(context).pop();
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('${country.flagEmoji} ${country.name}'),
+                            Text(country.dialCode),
+                          ],
                         ),
-                      );
-                    },
-                    itemCount: countries.length,
-                  ))
-                ],
+                      ),
+                    );
+                  },
+                ),
               ),
-            );
-          },
+            ],
+          ),
         );
       },
+      isScrollControlled: true,
     );
   }
 }

@@ -55,6 +55,7 @@ class _LoginFormState extends State<LoginForm> {
         ),
         ElevatedButton(
           onPressed: () {
+            _formController.resetAllErrors();
             if (!_formController.validate()) {
               return;
             }

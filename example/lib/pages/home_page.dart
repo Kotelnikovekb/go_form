@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_form_example/pages/phone_and_country.dart';
+import 'package:go_form_example/pages/select_file_page.dart';
 import 'package:go_form_example/pages/test_form_page.dart';
 import 'package:go_form_example/pages/validate_listener_page.dart';
 import 'package:go_form_example/pages/value_listener.dart';
@@ -33,26 +34,33 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.all(16),
         children: [
           _buildSectionTitle('Authentication'),
-          _buildNavButton(context, 'Login', const FormPage(title: 'Login Form', body: LoginForm())),
-          _buildNavButton(context, 'Registration', const FormPage(title: 'Registration Form', body: RegistrationPage())),
-
+          _buildNavButton(context, 'Login',
+              const FormPage(title: 'Login Form', body: LoginForm())),
+          _buildNavButton(
+              context,
+              'Registration',
+              const FormPage(
+                  title: 'Registration Form', body: RegistrationPage())),
           _buildSectionTitle('Examples'),
           _buildNavButton(context, 'Init values', const InitValuesPage()),
-          _buildNavButton(context, 'Dynamic Actions', const DynamicActionsPage()),
+          _buildNavButton(
+              context, 'Dynamic Actions', const DynamicActionsPage()),
           _buildNavButton(context, 'Test', const TestFormPage()),
           _buildNavButton(context, 'Big List', const BigListPage()),
           _buildNavButton(context, 'Focus', const FocusExamplePage()),
           _buildNavButton(context, 'Debounce', const DebounceExamplePage()),
-          _buildNavButton(context, 'Async Validator', const AsyncValidatorPage()),
-
+          _buildNavButton(
+              context, 'Async Validator', const AsyncValidatorPage()),
+          _buildNavButton(context, 'Select Files', const SelectFilePage()),
           _buildSectionTitle('Listeners'),
           _buildNavButton(context, 'Focus Listener', const FocusListenerPage()),
-          _buildNavButton(context, 'Validate Listener', const ValidateListenerPage()),
+          _buildNavButton(
+              context, 'Validate Listener', const ValidateListenerPage()),
           _buildNavButton(context, 'Value Listener', const ValueListenerPage()),
-
           _buildSectionTitle('Misc'),
           _buildNavButton(context, 'OnInit Page', const OninitPage()),
-          _buildNavButton(context, 'Phone and Country', const PhoneAndCountry()),
+          _buildNavButton(
+              context, 'Phone and Country', const PhoneAndCountry()),
         ],
       ),
     );

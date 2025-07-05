@@ -1,3 +1,18 @@
+## [1.8.0] - 2025-07-05
+
+### Added
+
+- Added `FieldStatus` enum with detailed states: `idle`, `loading`, `validated`, `error`, `debounce`, and `filled`.
+- Each `FieldController` now exposes `status` to track its current validation state.
+- Introduced `onDebounceComplete` callback for `FieldController`, allowing custom actions after debounce finishes.
+- Added `setStatus()` method to `FieldController` to programmatically update field status.
+- Enhanced `FormFieldData` with a new `status` field and added complete documentation comments for all fields and methods.
+- Added internal logic to preserve `FieldStatus.error` if a field has an error during debounce resolution.
+
+### Fixed
+
+- Status no longer resets incorrectly after debounce if the field already has a validation error.
+
 ## [1.7.0] - 2025-06-28
 
 ### Added

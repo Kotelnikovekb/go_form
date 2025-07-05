@@ -1,19 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../domain/domain.dart';
 import 'field_controller.dart';
-
-enum ErrorResetMode {
-  resetOnFocus,
-  resetOnValueChange,
-  noReset,
-}
-
-enum ValidationMode {
-  valueChange,
-  focusChange,
-  noValidate,
-}
 
 /// Manages the state, validation, and interaction of form fields.
 ///
@@ -108,6 +97,7 @@ class FormController {
     Future<String?> Function(T?)? asyncValidator,
     Key? key,
     Duration? debounceDuration,
+    void Function()? onDebounceComplete,
   }) {
     if (!_fields.containsKey(name)) {
       _initialValues[name] = initialValue;
@@ -117,6 +107,7 @@ class FormController {
         asyncValidator: asyncValidator,
         key: key,
         debounceDuration: debounceDuration,
+        onDebounceComplete: onDebounceComplete,
       );
       final field = _fields[name]!;
       T? lastValue = field.value;

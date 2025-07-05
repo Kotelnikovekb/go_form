@@ -70,6 +70,9 @@ abstract class FormFieldModelBase<T> {
   /// Optional async validator for the field.
   final Future<String?> Function(T?)? asyncValidator;
 
+  /// Optional callback that will be triggered after debounce completes.
+  final void Function()? onDebounceComplete;
+
   /// Constructor for creating a form field.
   ///
   /// - `name` – Required unique name for the field.
@@ -85,6 +88,7 @@ abstract class FormFieldModelBase<T> {
     this.asyncValidator,
     this.key,
     this.debounceDuration,
+    this.onDebounceComplete,
   });
 
   /// Abstract method that must be implemented to define the UI of the field.
@@ -96,6 +100,9 @@ abstract class FormFieldModelBase<T> {
   ///
   /// Useful for dynamic analysis of form structure.
   Type get fieldType => T;
+
+
+
 
 
   /// Registers this field in the `FormController` and returns its `FieldController`.
@@ -115,6 +122,7 @@ abstract class FormFieldModelBase<T> {
       asyncValidator: asyncValidator,
       key: key,
       debounceDuration: debounceDuration,
+      onDebounceComplete: onDebounceComplete,
     );
   }
 

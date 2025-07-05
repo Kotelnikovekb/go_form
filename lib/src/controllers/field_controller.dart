@@ -34,6 +34,7 @@ import '../domain/domain.dart';
 /// 🔹 `controller.error` – error message if the field is invalid.
 ///
 /// ---
+
 import 'dart:async';
 
 class FieldController<T> extends ChangeNotifier {
@@ -43,9 +44,12 @@ class FieldController<T> extends ChangeNotifier {
   Duration? debounceDuration;
 
   T? get value => _valueNotifier.value.value.value;
+
+  FieldStatus get status => _valueNotifier.value.status;
   final ValueNotifier<FormFieldData<T?>> _valueNotifier;
   final List<VoidCallback> _listeners = [];
   final FocusNode _focusNode = FocusNode();
+  final void Function()? onDebounceComplete;
 
   FieldController({
     T? initialValue,
@@ -53,6 +57,7 @@ class FieldController<T> extends ChangeNotifier {
     Future<String?> Function(T?)? asyncValidator,
     this.key,
     this.debounceDuration,
+    this.onDebounceComplete,
   }) : _valueNotifier = ValueNotifier(
           FormFieldData<T?>(
             initialValue: initialValue,
@@ -78,8 +83,12 @@ class FieldController<T> extends ChangeNotifier {
   void onChange(T? newValue) {
     if (debounceDuration != null) {
       _debounceTimer?.cancel();
+      _valueNotifier.value = _valueNotifier.value.copyWith(
+        status: FieldStatus.debounce,
+      );
       _debounceTimer = Timer(debounceDuration!, () {
         _applyChange(newValue);
+        onDebounceComplete?.call();
       });
     } else {
       _applyChange(newValue);
@@ -87,33 +96,38 @@ class FieldController<T> extends ChangeNotifier {
   }
 
   void _applyChange(T? newValue) {
-    _valueNotifier.value = FormFieldData<T?>(
+    final currentError = _valueNotifier.value.error;
+    final newStatus = currentError != null ? FieldStatus.error : FieldStatus.filled;
+
+    _valueNotifier.value = _valueNotifier.value.copyWith(
       initialValue: newValue,
-      validator: _valueNotifier.value.validator,
+      status: newStatus,
     );
+
     if (T == String && _textEditingController != null) {
       if (_textEditingController!.text != newValue) {
         _textEditingController!.text = newValue as String? ?? '';
       }
     }
+
     notifyListeners();
   }
 
   void setError(String? newError) {
-    _valueNotifier.value = FormFieldData<T?>(
+    _valueNotifier.value = _valueNotifier.value.copyWith(
       initialValue: _valueNotifier.value.value.value,
-      validator: _valueNotifier.value.validator,
       error: newError,
+      status: newError == null ? FieldStatus.filled : FieldStatus.error,
     );
     notifyListeners();
   }
 
   void setValue(dynamic newValue) {
     if (newValue is T || newValue == null) {
-      _valueNotifier.value = FormFieldData<T?>(
+      _valueNotifier.value = _valueNotifier.value.copyWith(
         initialValue: newValue,
-        validator: _valueNotifier.value.validator,
         error: _valueNotifier.value.error,
+        status: FieldStatus.debounce,
       );
       if (T == String && _textEditingController != null) {
         if (_textEditingController!.text != newValue) {
@@ -136,10 +150,17 @@ class FieldController<T> extends ChangeNotifier {
   }
 
   void clearError() {
-    _valueNotifier.value = FormFieldData<T?>(
+    _valueNotifier.value = _valueNotifier.value.copyWith(
       initialValue: _valueNotifier.value.value.value,
-      validator: _valueNotifier.value.validator,
       error: null,
+      status: FieldStatus.filled,
+    );
+    notifyListeners();
+  }
+
+  void setStatus(FieldStatus status) {
+    _valueNotifier.value = _valueNotifier.value.copyWith(
+      status: status,
     );
     notifyListeners();
   }
@@ -169,6 +190,8 @@ class FieldController<T> extends ChangeNotifier {
   Future<String?> validateAsync() async {
     final asyncValidator = _valueNotifier.value.asyncValidator;
     if (asyncValidator != null) {
+      _valueNotifier.value =
+          _valueNotifier.value.copyWith(status: FieldStatus.loading);
       final result = await Future.value(asyncValidator.call(value));
       if (result != null) {
         setError(result);
