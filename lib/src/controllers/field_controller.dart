@@ -96,12 +96,10 @@ class FieldController<T> extends ChangeNotifier {
   }
 
   void _applyChange(T? newValue) {
-    final currentError = _valueNotifier.value.error;
-    final newStatus = currentError != null ? FieldStatus.error : FieldStatus.filled;
-
     _valueNotifier.value = _valueNotifier.value.copyWith(
       initialValue: newValue,
-      status: newStatus,
+      error: null,
+      status: FieldStatus.filled,
     );
 
     if (T == String && _textEditingController != null) {
