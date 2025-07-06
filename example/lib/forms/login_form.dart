@@ -12,7 +12,7 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
-  final _formController = FormController();
+  final _formController = FormController(debug: true);
 
   @override
   Widget build(BuildContext context) {

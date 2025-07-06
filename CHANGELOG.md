@@ -1,3 +1,7 @@
+## [1.8.1] - 2025-07-05
+### Fixed
+- Fixed an issue where validation error state would not clear after successful re-validation
+
 ## [1.8.0] - 2025-07-05
 
 ### Added

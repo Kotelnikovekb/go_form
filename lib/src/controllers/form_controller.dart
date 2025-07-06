@@ -402,6 +402,12 @@ class FormController {
   /// - **Parameter `name`** – The name of the field whose error should be cleared.
   void resetError(String name) {
     _fields[name]?.setError(null);
+
+    if (_debug) {
+      if (kDebugMode) {
+        print('resset error for $name');
+      }
+    }
   }
 
   /// Resets all validation errors in the form.

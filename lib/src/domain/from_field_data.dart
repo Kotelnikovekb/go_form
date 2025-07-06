@@ -41,18 +41,18 @@ class FormFieldData<T> {
       status.hashCode;
 
   /// Creates a copy of this [FormFieldData] with the ability to override some properties.
-  FormFieldData<T> copyWith({
-    T? initialValue,
-    String? error,
-    String? Function(dynamic value)? validator,
-    T? value,
-    Future<String?> Function(T? value)? asyncValidator,
-    FieldStatus? status,
-    void Function()? onDebounceComplete,
-  }) {
+  FormFieldData<T> copyWith(
+      {T? initialValue,
+      String? error,
+      String? Function(dynamic value)? validator,
+      T? value,
+      Future<String?> Function(T? value)? asyncValidator,
+      FieldStatus? status,
+      void Function()? onDebounceComplete,
+      bool resetError = false}) {
     return FormFieldData<T>(
       initialValue: initialValue ?? this.value.value,
-      error: error ?? this.error,
+      error: resetError ? null : (error ?? this.error),
       validator: validator ?? this.validator,
       asyncValidator: asyncValidator ?? this.asyncValidator,
       status: status ?? this.status,
