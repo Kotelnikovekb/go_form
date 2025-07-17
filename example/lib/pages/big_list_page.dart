@@ -44,7 +44,7 @@ class _BigListPageState extends State<BigListPage> {
           controller: _scrollController,
           child: DynamicForm(
             fields: [
-              ...List.generate(10, (index){
+              ...List.generate(50, (index){
                 return GoTextInput(
                   name: 'text$index',
                   label: 'Email',

@@ -20,6 +20,8 @@ class AsyncValidatorPage extends StatefulWidget {
 class _AsyncValidatorPageState extends State<AsyncValidatorPage> {
   final formController = FormController();
 
+  bool? result;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,7 +29,7 @@ class _AsyncValidatorPageState extends State<AsyncValidatorPage> {
         title: const Text('Async Validator'),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Column(
           children: [
             DynamicForm(
@@ -36,8 +38,8 @@ class _AsyncValidatorPageState extends State<AsyncValidatorPage> {
                   name: 'search',
                   label: 'Search',
                   asyncValidator: (value) async {
-                    await Future.delayed(const Duration(seconds: 10));
-                    if(value==null||value.isEmpty){
+                    await Future.delayed(const Duration(seconds: 2));
+                    if (value == null || value.isEmpty) {
                       return 'error';
                     }
                     return null;
@@ -49,13 +51,18 @@ class _AsyncValidatorPageState extends State<AsyncValidatorPage> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
-                final result = await formController.validateAsync();
-                if(!result){
-
-                }
+                final isValid = await formController.validateAsync();
+                setState(() {
+                  result = isValid;
+                });
+                print(isValid);
               },
               child: const Text('Validate'),
             ),
+            const SizedBox(
+              height: 20,
+            ),
+            if (result != null) Text(result.toString()),
           ],
         ),
       ),

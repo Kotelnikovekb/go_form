@@ -26,59 +26,61 @@ class _FocusExamplePageState extends State<FocusExamplePage> {
       appBar: AppBar(title: const Text('Focus Example')),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            DynamicForm(
-              fields: [
-                GoTextInput(
-                  label: 'Name',
-                  name: 'name',
-                ),
-                GoTextInput(
-                  label: 'Email',
-                  name: 'email',
-                ),
-                GoPasswordInput(
-                  name: 'password',
-                  label: 'Password',
-                  validator: (val) {
-                    if (val == null || val.isEmpty) {
-                      return 'Согласись';
-                    }
-                    return null;
-                  },
-                ),
-              ],
-              controller: form,
-            ),
-            const SizedBox(height: 32),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                ElevatedButton(
-                  onPressed: () => form.focus('name'),
-                  child: const Text('Focus Name'),
-                ),
-                ElevatedButton(
-                  onPressed: () => form.focus('email'),
-                  child: const Text('Focus Email'),
-                ),
-                ElevatedButton(
-                  onPressed: () => form.focus('password'),
-                  child: const Text('Focus Password'),
-                ),
-                ElevatedButton(
-                  onPressed: () => form.unfocus('email'),
-                  child: const Text('Unfocus Email'),
-                ),
-                ElevatedButton(
-                  onPressed: () => form.focusNext('name'),
-                  child: const Text('Focus Next After Name'),
-                ),
-              ],
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              DynamicForm(
+                fields: [
+                  GoTextInput(
+                    label: 'Name',
+                    name: 'name',
+                  ),
+                  GoTextInput(
+                    label: 'Email',
+                    name: 'email',
+                  ),
+                  GoPasswordInput(
+                    name: 'password',
+                    label: 'Password',
+                    validator: (val) {
+                      if (val == null || val.isEmpty) {
+                        return 'Согласись';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+                controller: form,
+              ),
+              const SizedBox(height: 32),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => form.focus('name'),
+                    child: const Text('Focus Name'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => form.focus('email'),
+                    child: const Text('Focus Email'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => form.focus('password'),
+                    child: const Text('Focus Password'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => form.unfocus('email'),
+                    child: const Text('Unfocus Email'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => form.focusNext('name'),
+                    child: const Text('Focus Next After Name'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

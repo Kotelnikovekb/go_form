@@ -100,6 +100,12 @@ class _DynamicActionsPageState extends State<DynamicActionsPage> {
             ),
             ElevatedButton(
               onPressed: () {
+                _formController.setError('text', 'User exist');
+              },
+              child: const Text('Set error'),
+            ),
+            ElevatedButton(
+              onPressed: () {
                 setState(() {
                   _output =
                       'Single value: ${_formController.getFieldValue<String>('text')}';

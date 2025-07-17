@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_form/go_form.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:flutter_libphonenumber/flutter_libphonenumber.dart';
 
 import '../domain/country_phone_dto.dart';
 import '../inputs/go_text_input.dart';
+import '../inputs/root_input.dart';
 
 class PhoneAndCountry extends StatefulWidget {
   const PhoneAndCountry({super.key});
@@ -13,93 +15,7 @@ class PhoneAndCountry extends StatefulWidget {
 }
 
 class _PhoneAndCountryState extends State<PhoneAndCountry> {
-  final formController = FormController();
-  List<CountryPhoneDto> countries = [
-    CountryPhoneDto(
-      name: 'Россия',
-      nativeName: 'Россия',
-      countryCode: 'RU',
-      dialCode: '+7',
-      flagEmoji: '🇷🇺',
-      phoneMask: '(###) ###-##-##',
-      priority: 1,
-    ),
-    CountryPhoneDto(
-      name: 'США',
-      nativeName: 'United States',
-      countryCode: 'US',
-      dialCode: '+1',
-      flagEmoji: '🇺🇸',
-      phoneMask: '(###) ###-####',
-      priority: 2,
-    ),
-    CountryPhoneDto(
-      name: 'Германия',
-      nativeName: 'Deutschland',
-      countryCode: 'DE',
-      dialCode: '+49',
-      flagEmoji: '🇩🇪',
-      phoneMask: '#### ########',
-      priority: 4,
-    ),
-    CountryPhoneDto(
-      name: 'Франция',
-      nativeName: 'France',
-      countryCode: 'FR',
-      dialCode: '+33',
-      flagEmoji: '🇫🇷',
-      phoneMask: '# ## ## ## ##',
-      priority: 5,
-    ),
-    CountryPhoneDto(
-      name: 'Бразилия',
-      nativeName: 'Brasil',
-      countryCode: 'BR',
-      dialCode: '+55',
-      flagEmoji: '🇧🇷',
-      phoneMask: '(##) #####-####',
-      priority: 6,
-    ),
-  ];
-
-  late final MaskTextInputFormatter maskFormatter;
-
-  late CountryPhoneDto defaultCountry;
-
-  @override
-  void initState() {
-    final locale = 'RU';
-    defaultCountry = countries.firstWhere(
-      (c) => c.countryCode == locale,
-      orElse: () => countries.first,
-    );
-
-    maskFormatter = MaskTextInputFormatter(
-      mask: defaultCountry.phoneMask,
-      filter: {"#": RegExp(r'[0-9]')},
-      type: MaskAutoCompletionType.lazy,
-    );
-
-    super.initState();
-
-    formController.addFieldValueListener((field, value) {
-      if (field == 'country') {
-        final country = formController.getFieldValue<CountryPhoneDto>('country');
-        formController.setValue('phone', '');
-        updateMaskFormatter(country ?? defaultCountry);
-      }
-    });
-  }
-
-  void updateMaskFormatter(CountryPhoneDto country) {
-    setState(() {
-      maskFormatter = MaskTextInputFormatter(
-        mask: country.phoneMask,
-        filter: {"#": RegExp(r'[0-9]')},
-        type: MaskAutoCompletionType.lazy,
-      );
-    });
-  }
+  final formController = FormController(debug: true);
 
   @override
   Widget build(BuildContext context) {
@@ -109,12 +25,9 @@ class _PhoneAndCountryState extends State<PhoneAndCountry> {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            GoPhoneInput(
-              countries: countries,
-              formController: formController,
-              phoneMask: maskFormatter,
-              defaultCountry: defaultCountry,
-            ),
+            DynamicForm(fields: [
+              GoPhoneAndCountryInput(name: 'phoneAndCountrty'),
+            ], controller: formController),
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
@@ -129,115 +42,142 @@ class _PhoneAndCountryState extends State<PhoneAndCountry> {
   }
 }
 
-class GoPhoneInput extends StatefulWidget {
-  final List<CountryPhoneDto> countries;
-  final FormController formController;
-  final MaskTextInputFormatter phoneMask;
-  final CountryPhoneDto defaultCountry;
+class PhoneState {
+  final String? value;
+  final MaskTextInputFormatter maskFormatter;
+  final CountryPhoneDto country;
 
-  const GoPhoneInput({
-    super.key,
-    required this.formController,
-    required this.countries,
-    required this.phoneMask,
-    required this.defaultCountry,
+  const PhoneState({
+    this.value,
+    required this.maskFormatter,
+    required this.country,
   });
 
-  @override
-  State<GoPhoneInput> createState() => _GoPhoneInputState();
-}
-
-class _GoPhoneInputState extends State<GoPhoneInput> {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        CountryDropdown(
-          countries: widget.countries,
-          formController: widget.formController,
-          defaultCountry: widget.defaultCountry,
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: DynamicForm(
-            fields: [
-              GoTextInput(
-                keyboardType: const TextInputType.numberWithOptions(),
-                label: 'Телефон',
-                name: 'phone',
-                inputFormatters: [widget.phoneMask],
-                validator: (v) {
-                  if (v == null || v.isEmpty) {
-                    return 'Поле обязательно';
-                  }
-                  return null;
-                },
-              ),
-            ],
-            controller: widget.formController,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class CountryDropdown extends StatelessWidget {
-  final List<CountryPhoneDto> countries;
-  final FormController formController;
-  final CountryPhoneDto defaultCountry;
-
-  const CountryDropdown({
-    super.key,
-    required this.countries,
-    required this.formController,
-    required this.defaultCountry,
-  });
+  PhoneState copyWith({
+    String? value,
+    MaskTextInputFormatter? maskFormatter,
+    CountryPhoneDto? country,
+    bool? clearPhone,
+  }) =>
+      PhoneState(
+        value: (clearPhone == true) ? null : value ?? this.value,
+        maskFormatter: maskFormatter ?? this.maskFormatter,
+        country: country ?? this.country,
+      );
 
   @override
-  Widget build(BuildContext context) {
-    return DynamicForm(
-      fields: [
-        CountryCodeSelector(
-          name: 'country',
-          countries: countries,
-          validator: (v) {
-            if (v == null) {
-              return 'Поле обязательно';
-            }
-            return null;
-          },
-          initialValue: defaultCountry,
-        )
-      ],
-      controller: formController,
-    );
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PhoneState &&
+          runtimeType == other.runtimeType &&
+          value == other.value &&
+          maskFormatter == other.maskFormatter &&
+          country == other.country;
+
+  @override
+  int get hashCode => Object.hash(value, maskFormatter, country);
 }
 
-class CountryCodeSelector extends FormFieldModelBase<CountryPhoneDto> {
-  final List<CountryPhoneDto> countries;
+List<CountryPhoneDto> countries = [
+  CountryPhoneDto(
+    name: 'Россия',
+    nativeName: 'Россия',
+    countryCode: 'RU',
+    dialCode: '+7',
+    flagEmoji: '🇷🇺',
+    phoneMask: '(###) ###-##-##',
+    priority: 1,
+  ),
+  CountryPhoneDto(
+    name: 'США',
+    nativeName: 'United States',
+    countryCode: 'US',
+    dialCode: '+1',
+    flagEmoji: '🇺🇸',
+    phoneMask: '(###) ###-####',
+    priority: 2,
+  ),
+  CountryPhoneDto(
+    name: 'Германия',
+    nativeName: 'Deutschland',
+    countryCode: 'DE',
+    dialCode: '+49',
+    flagEmoji: '🇩🇪',
+    phoneMask: '#### ########',
+    priority: 4,
+  ),
+  CountryPhoneDto(
+    name: 'Франция',
+    nativeName: 'France',
+    countryCode: 'FR',
+    dialCode: '+33',
+    flagEmoji: '🇫🇷',
+    phoneMask: '# ## ## ## ##',
+    priority: 5,
+  ),
+  CountryPhoneDto(
+    name: 'Бразилия',
+    nativeName: 'Brasil',
+    countryCode: 'BR',
+    dialCode: '+55',
+    flagEmoji: '🇧🇷',
+    phoneMask: '(##) #####-####',
+    priority: 6,
+  ),
+];
 
-  const CountryCodeSelector({
+class GoPhoneAndCountryInput extends FormFieldModelBase<PhoneState> {
+  final String? label;
+
+  const GoPhoneAndCountryInput({
     required super.name,
-    required this.countries,
-    super.validator,
-    super.initialValue,
+    this.label,
   });
 
   @override
-  Widget build(
-      BuildContext context, FieldController<CountryPhoneDto> controller) {
-    return InkWell(
-      onTap: () => _showCountrySelectionSheet(context, controller),
-      child: Text(
-        '${controller.value?.flagEmoji} ${controller.value?.dialCode}',
+  void onInit(FieldController<PhoneState> controller) {
+    final country = countries.firstWhere(
+      (c) => c.countryCode == 'RU',
+      orElse: () => countries.first,
+    );
+    final maskFormatter = MaskTextInputFormatter(
+      mask: country.phoneMask,
+      filter: {"#": RegExp(r'[0-9]')},
+    );
+    controller.setValue(
+      PhoneState(value: '', maskFormatter: maskFormatter, country: country),
+    );
+
+    super.onInit(controller);
+  }
+
+  @override
+  Widget build(BuildContext context, FieldController<PhoneState> controller) {
+    final value = controller.value;
+    if (value == null) {
+      return Container();
+    }
+
+    return RootInput(
+      initialValue: controller.value?.value,
+      key: ValueKey(controller.value!.maskFormatter.getMask()),
+      onChanged: (newValue) =>
+          controller.onChange(controller.value?.copyWith(value: newValue)),
+      errorText: controller.error,
+      labelText: label,
+      prefix: InkWell(
+        onTap: () => _showCountrySelectionSheet(context, controller),
+        child: Text(
+          '${controller.value?.country.flagEmoji} ${controller.value?.country.dialCode} ',
+        ),
       ),
+      inputFormatters: [controller.value!.maskFormatter],
+      focusNode: controller.focusNode,
     );
   }
 
   void _showCountrySelectionSheet(
-      BuildContext context, FieldController<CountryPhoneDto> controller) {
+      BuildContext context, FieldController<PhoneState> controller) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -263,7 +203,17 @@ class CountryCodeSelector extends FormFieldModelBase<CountryPhoneDto> {
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: InkWell(
                         onTap: () {
-                          controller.setValue(country);
+                          controller.setValue(
+                            controller.value?.copyWith(
+                              country: country,
+                              maskFormatter: MaskTextInputFormatter(
+                                mask: country.phoneMask,
+                                filter: {"#": RegExp(r'[0-9]')},
+                              ),
+                              clearPhone: true,
+                            ),
+                          );
+                          controller.value?.maskFormatter.clear();
                           Navigator.of(context).pop();
                         },
                         child: Row(

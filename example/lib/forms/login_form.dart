@@ -13,6 +13,7 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   final _formController = FormController(debug: true);
+  String result='';
 
   @override
   Widget build(BuildContext context) {
@@ -60,12 +61,16 @@ class _LoginFormState extends State<LoginForm> {
               return;
             }
             print('${_formController.getValues()}');
+            setState(() {
+              result='${_formController.getValues()}';
+            });
           },
-          child: Text('Результат'),
+          child: const Text('Результат'),
         ),
-        SizedBox(
+        const SizedBox(
           height: 30,
         ),
+        Text(result)
       ],
     );
   }

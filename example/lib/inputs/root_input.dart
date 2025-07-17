@@ -5,7 +5,7 @@ class RootInput extends TextFormField {
     super.key,
     super.focusNode,
     required void Function(String) super.onChanged,
-    required super.validator,
+    super.validator,
     required super.initialValue,
     required String? errorText,
     Widget? prefixIcon,

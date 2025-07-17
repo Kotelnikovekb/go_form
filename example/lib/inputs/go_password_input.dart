@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_form/go_form.dart';
 import 'package:go_form_example/inputs/root_input.dart';
 
-class GoPasswordInput extends FormFieldModelBase<String>{
+class GoPasswordInput extends FormFieldModelBase<String> {
   final String label;
-  GoPasswordInput( {required super.name, super.validator,required this.label,});
+
+  GoPasswordInput({
+    required super.name,
+    super.validator,
+    required this.label,
+  });
 
   @override
   Widget build(BuildContext context, FieldController controller) {
@@ -12,6 +17,7 @@ class GoPasswordInput extends FormFieldModelBase<String>{
       controller: controller,
       label: label,
       validator: validator,
+      focusNode: controller.focusNode,
     );
   }
 }
@@ -20,11 +26,13 @@ class _PasswordField extends StatefulWidget {
   final FieldController controller;
   final String label;
   final String? Function(String?)? validator;
+  final FocusNode? focusNode;
 
   const _PasswordField({
     required this.controller,
     required this.label,
     this.validator,
+    this.focusNode,
   });
 
   @override
@@ -51,6 +59,7 @@ class _PasswordFieldState extends State<_PasswordField> {
         },
       ),
       obscureText: !showPassword,
+      focusNode: widget.focusNode,
     );
   }
 }
