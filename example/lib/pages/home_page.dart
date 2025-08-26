@@ -3,6 +3,7 @@ import 'package:go_form_example/pages/phone_and_country.dart';
 import 'package:go_form_example/pages/select_file_page.dart';
 import 'package:go_form_example/pages/test_form_page.dart';
 import 'package:go_form_example/pages/validate_listener_page.dart';
+import 'package:go_form_example/pages/validate_mode_page.dart';
 import 'package:go_form_example/pages/value_listener.dart';
 
 import '../forms/forms.dart';
@@ -49,6 +50,8 @@ class _HomePageState extends State<HomePage> {
           _buildNavButton(context, 'Big List', const BigListPage()),
           _buildNavButton(context, 'Focus', const FocusExamplePage()),
           _buildNavButton(context, 'Debounce', const DebounceExamplePage()),
+          _buildNavButton(context, 'Validate mode', const ValidateModePage()),
+
           _buildNavButton(
               context, 'Async Validator', const AsyncValidatorPage()),
           _buildNavButton(context, 'Select Files', const SelectFilePage()),

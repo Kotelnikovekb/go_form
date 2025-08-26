@@ -8,8 +8,9 @@ class GoTextInput extends FormFieldModelBase<String> {
   final Widget? prefix;
   final List<TextInputFormatter>? inputFormatters;
   final TextInputType? keyboardType;
+  final bool obscureText;
 
-  GoTextInput({
+  const GoTextInput({
     required super.name,
     super.validator,
     required this.label,
@@ -20,6 +21,7 @@ class GoTextInput extends FormFieldModelBase<String> {
     super.initialValue,
     super.debounceDuration,
     super.asyncValidator,
+    this.obscureText = false,
   });
 
   @override

@@ -31,6 +31,63 @@ class FormController {
   /// Stores form fields by their names.
   final Map<String, FieldController<dynamic>> _fields = {};
 
+  /// Global validation triggers applied to all fields by default.
+  ///
+  /// Defines when automatic field validation should occur.
+  /// Individual fields can override these settings through the `validationTriggers`
+  /// parameter in the `addTextField()` method or via `setFieldValidationTriggers()`.
+  ///
+  /// ### Available triggers:
+  /// - `ValidationTrigger.onSubmit` — validation only when calling `validate()` or `validateAsync()`
+  /// - `ValidationTrigger.onValueChange` — validation on every field value change
+  /// - `ValidationTrigger.onFocusLost` — validation when field loses focus
+  /// - `ValidationTrigger.onFocusGained` — validation when field gains focus
+  /// - `ValidationTrigger.onDebounceComplete` — validation after debounce completion
+  /// - `ValidationTrigger.manual` — manual validation only
+  ///
+  /// ### Example usage:
+  /// ```dart
+  /// final formController = FormController(
+  ///   defaultValidationTriggers: {
+  ///     ValidationTrigger.onFocusLost,
+  ///     ValidationTrigger.onValueChange,
+  ///   },
+  /// );
+  /// ```
+  final Set<ValidationTrigger> defaultValidationTriggers;
+  final Map<String, Set<ValidationTrigger>> _fieldValidationTriggers = {};
+
+  /// Enables validation mode only after the first form submission attempt.
+  ///
+  /// When set to `true`, validation will not trigger on specified triggers
+  /// until `validate()` or `validateAsync()` has been called at least once.
+  /// This improves user experience by preventing error display before input completion.
+  ///
+  /// ### Benefits:
+  /// - **Friendly interface** — user doesn't see errors during initial input
+  /// - **Responsive validation** — after first submission helps fix errors in real-time
+  /// - **Standard UX pattern** — used in most modern forms
+  ///
+  /// ### Example usage:
+  /// ```dart
+  /// final formController = FormController(
+  ///   defaultValidationTriggers: {ValidationTrigger.onValueChange},
+  ///   validateOnlyAfterFirstSubmit: true,
+  /// );
+  ///
+  /// // User enters data - no errors shown
+  /// formController.setValue('email', 'invalid-email');
+  ///
+  /// // Errors appear on first submission
+  /// bool isValid = formController.validate(); // false
+  ///
+  /// // Now validation works in real-time
+  /// formController.setValue('email', 'valid@email.com'); // error disappears instantly
+  /// ```
+  final bool validateOnlyAfterFirstSubmit;
+
+  bool _hasBeenSubmitted = false;
+
   bool _lastValidationState = false;
   bool _isValidationRunning = false;
 
@@ -51,6 +108,8 @@ class FormController {
   /// - `debug` enables debug mode for strict field validation.
   FormController({
     this.errorResetMode = ErrorResetMode.resetOnFocus,
+    this.defaultValidationTriggers = const {ValidationTrigger.onSubmit},
+    this.validateOnlyAfterFirstSubmit = false,
     bool debug = false,
   }) : _debug = debug;
 
@@ -98,7 +157,12 @@ class FormController {
     Key? key,
     Duration? debounceDuration,
     void Function()? onDebounceComplete,
+    Set<ValidationTrigger>? validationTriggers,
   }) {
+    if (validationTriggers != null) {
+      _fieldValidationTriggers[name] = validationTriggers;
+    }
+
     if (!_fields.containsKey(name)) {
       _initialValues[name] = initialValue;
       _fields[name] = FieldController<T>(
@@ -107,7 +171,13 @@ class FormController {
         asyncValidator: asyncValidator,
         key: key,
         debounceDuration: debounceDuration,
-        onDebounceComplete: onDebounceComplete,
+        onDebounceComplete: () {
+          onDebounceComplete?.call();
+          if (_shouldValidateOnTrigger(
+              ValidationTrigger.onDebounceComplete, name)) {
+            _validateField(name);
+          }
+        },
       );
       final field = _fields[name]!;
       T? lastValue = field.value;
@@ -117,6 +187,28 @@ class FormController {
 
         if (field.value != lastValue) {
           lastValue = field.value;
+
+          if (_shouldValidateOnTrigger(ValidationTrigger.onValueChange, name)) {
+            _validateField(name);
+          }
+
+          for (final listener in _fieldValueListeners) {
+            listener(name, field.value);
+          }
+        }
+      });
+
+      field.addListener(() {
+        _notifyListeners();
+        _silentValidate();
+
+        if (field.value != lastValue) {
+          lastValue = field.value;
+
+          if (_shouldValidateOnTrigger(ValidationTrigger.onValueChange, name)) {
+            _validateField(name);
+          }
+
           for (final listener in _fieldValueListeners) {
             listener(name, field.value);
           }
@@ -126,25 +218,24 @@ class FormController {
 
     final field = _fields[name]!;
     field.focusNode.addListener(() {
-      if (validateOnFieldChange && !field.focusNode.hasFocus) {
-        _validateField(name);
-      }
-      if (errorResetMode == ErrorResetMode.resetOnFocus &&
-          field.focusNode.hasFocus) {
-        resetError(name);
-      }
-    });
-    field.focusNode.addListener(() {
       final hasFocus = field.focusNode.hasFocus;
+
       for (final listener in _fieldFocusListeners) {
         listener(name, field.focusNode);
       }
 
-      if (validateOnFieldChange && !hasFocus) {
-        _validateField(name);
-      }
-      if (errorResetMode == ErrorResetMode.resetOnFocus && hasFocus) {
-        resetError(name);
+      if (hasFocus) {
+        if (_shouldValidateOnTrigger(ValidationTrigger.onFocusGained, name)) {
+          _validateField(name);
+        }
+
+        if (errorResetMode == ErrorResetMode.resetOnFocus) {
+          resetError(name);
+        }
+      } else {
+        if (_shouldValidateOnTrigger(ValidationTrigger.onFocusLost, name)) {
+          _validateField(name);
+        }
       }
     });
 
@@ -155,6 +246,15 @@ class FormController {
     for (final listener in _listeners) {
       listener();
     }
+  }
+
+  bool _shouldValidateOnTrigger(ValidationTrigger trigger, String fieldName) {
+    if (validateOnlyAfterFirstSubmit && !_hasBeenSubmitted) {
+      return false;
+    }
+    final triggers =
+        _fieldValidationTriggers[fieldName] ?? defaultValidationTriggers;
+    return triggers.contains(trigger);
   }
 
   void _silentValidate() {
@@ -175,6 +275,38 @@ class FormController {
     });
   }
 
+  /// Validates a specific field by its name.
+  ///
+  /// Performs synchronous validation of the specified field using its `validator`.
+  /// If validation fails, the error is automatically set on the field.
+  ///
+  /// ### Parameters:
+  /// - `name` — name of the field to validate
+  ///
+  /// ### Returns:
+  /// `true` if the field is valid or doesn't exist, `false` if there's a validation error.
+  ///
+  /// ### Example usage:
+  /// ```dart
+  /// formController.addTextField<String>(
+  ///   name: 'email',
+  ///   validator: (val) => val?.contains('@') != true ? 'Invalid email' : null,
+  /// );
+  ///
+  /// formController.setValue('email', 'invalid-email');
+  ///
+  /// bool isEmailValid = formController.validateField('email');
+  /// print(isEmailValid); // false
+  /// print(formController.getError('email')); // 'Invalid email'
+  /// ```
+  bool validateField(String name) {
+    final field = _fields[name];
+    if (field == null) return true;
+
+    final error = field.validate();
+    return error == null;
+  }
+
   bool _isValid() {
     for (var field in _fields.values) {
       if (!field.silentValidate()) {
@@ -182,6 +314,44 @@ class FormController {
       }
     }
     return true;
+  }
+
+  /// Asynchronously validates a specific field by its name.
+  ///
+  /// Performs asynchronous validation of the specified field using its `asyncValidator`.
+  /// If validation fails, the error is automatically set on the field.
+  /// During async validation execution, the field status is set to `FieldStatus.loading`.
+  ///
+  /// ### Parameters:
+  /// - `name` — name of the field to validate
+  ///
+  /// ### Returns:
+  /// `Future<bool>` that resolves to `true` if the field is valid or doesn't exist,
+  /// `false` if there's a validation error.
+  ///
+  /// ### Example usage:
+  /// ```dart
+  /// formController.addTextField<String>(
+  ///   name: 'username',
+  ///   asyncValidator: (val) async {
+  ///     // Simulate server-side check
+  ///     await Future.delayed(Duration(seconds: 1));
+  ///     return val == 'admin' ? 'Username already exists' : null;
+  ///   },
+  /// );
+  ///
+  /// formController.setValue('username', 'admin');
+  ///
+  /// bool isUsernameValid = await formController.validateFieldAsync('username');
+  /// print(isUsernameValid); // false
+  /// print(formController.getError('username')); // 'Username already exists'
+  /// ```
+  Future<bool> validateFieldAsync(String name) async {
+    final field = _fields[name];
+    if (field == null) return true;
+
+    final error = await field.validateAsync();
+    return error == null;
   }
 
   void addFocusListener(
@@ -192,6 +362,78 @@ class FormController {
   void removeFocusListener(
       void Function(String name, FocusNode focusNode) listener) {
     _fieldFocusListeners.remove(listener);
+  }
+
+  /// Sets individual validation triggers for a specific field.
+  ///
+  /// Overrides the global `defaultValidationTriggers` for the specified field.
+  /// Allows configuring different validation behavior for different fields in the same form.
+  ///
+  /// ### Parameters:
+  /// - `fieldName` — name of the field
+  /// - `triggers` — set of validation triggers for this field
+  ///
+  /// ### Example usage:
+  /// ```dart
+  /// // Global settings - validation on focus lost
+  /// final formController = FormController(
+  ///   defaultValidationTriggers: {ValidationTrigger.onFocusLost},
+  /// );
+  ///
+  /// // Email uses global settings
+  /// formController.addTextField<String>(name: 'email');
+  ///
+  /// // Password needs real-time validation
+  /// formController.addTextField<String>(name: 'password');
+  /// formController.setFieldValidationTriggers('password', {
+  ///   ValidationTrigger.onValueChange,
+  ///   ValidationTrigger.onFocusLost,
+  /// });
+  ///
+  /// // Confirm password validates only on submit
+  /// formController.addTextField<String>(name: 'confirmPassword');
+  /// formController.setFieldValidationTriggers('confirmPassword', {
+  ///   ValidationTrigger.onSubmit,
+  /// });
+  /// ```
+  void setFieldValidationTriggers(
+      String fieldName, Set<ValidationTrigger> triggers) {
+    _fieldValidationTriggers[fieldName] = triggers;
+  }
+
+  /// Gets current validation triggers for a specific field.
+  ///
+  /// Returns individual field triggers if set,
+  /// or global `defaultValidationTriggers` otherwise.
+  ///
+  /// ### Parameters:
+  /// - `fieldName` — name of the field
+  ///
+  /// ### Returns:
+  /// `Set<ValidationTrigger>` — set of validation triggers for the specified field.
+  ///
+  /// ### Example usage:
+  /// ```dart
+  /// final formController = FormController(
+  ///   defaultValidationTriggers: {ValidationTrigger.onFocusLost},
+  /// );
+  ///
+  /// formController.addTextField<String>(name: 'email');
+  /// formController.addTextField<String>(name: 'password');
+  ///
+  /// // Set individual triggers for password
+  /// formController.setFieldValidationTriggers('password', {
+  ///   ValidationTrigger.onValueChange
+  /// });
+  ///
+  /// print(formController.getFieldValidationTriggers('email'));
+  /// // Outputs: {ValidationTrigger.onFocusLost} (global)
+  ///
+  /// print(formController.getFieldValidationTriggers('password'));
+  /// // Outputs: {ValidationTrigger.onValueChange} (individual)
+  /// ```
+  Set<ValidationTrigger> getFieldValidationTriggers(String fieldName) {
+    return _fieldValidationTriggers[fieldName] ?? defaultValidationTriggers;
   }
 
   /// Checks if there are any registered listeners.
@@ -268,6 +510,54 @@ class FormController {
     _validationListeners.remove(listener);
   }
 
+  /// Returns a list of all registered field names.
+  ///
+  /// This method provides access to field names without exposing
+  /// internal field controllers directly.
+  ///
+  /// ### Example usage:
+  /// ```dart
+  /// List<String> fieldNames = formController.getFieldNames();
+  /// print(fieldNames); // ['email', 'password', 'confirmPassword']
+  /// ```
+  List<String> getFieldNames() {
+    return _fields.keys.toList();
+  }
+
+  /// Returns the count of registered fields.
+  ///
+  /// ### Example usage:
+  /// ```dart
+  /// int fieldCount = formController.getFieldCount();
+  /// print('Form has $fieldCount fields');
+  /// ```
+  int getFieldCount() {
+    return _fields.length;
+  }
+
+  /// Checks if the form has any registered fields.
+  ///
+  /// ### Example usage:
+  /// ```dart
+  /// bool isEmpty = formController.isEmpty;
+  /// if (isEmpty) {
+  ///   print('No fields registered yet');
+  /// }
+  /// ```
+  bool get isEmpty => _fields.isEmpty;
+
+  /// Checks if the form has registered fields.
+  ///
+  /// ### Example usage:
+  /// ```dart
+  /// bool isNotEmpty = formController.isNotEmpty;
+  /// if (isNotEmpty) {
+  ///   print('Form has ${getFieldCount()} fields');
+  /// }
+  /// ```
+  bool get isNotEmpty => _fields.isNotEmpty;
+
+
   /// Adds a listener that gets notified whenever a field value changes.
   ///
   /// The listener receives the field name and its new value.
@@ -332,12 +622,11 @@ class FormController {
     return field;
   }
 
-  void _validateField<T>(String name) {
-    /*final field = _fields[name];
+  void _validateField(String name) {
+    final field = _fields[name];
     if (field != null) {
-      final error = field.validator?.call(field.value.value);
-      field.error.value = error;
-    }*/
+      field.validate();
+    }
   }
 
   /// Sets a validation error for a specific field.
@@ -584,22 +873,26 @@ class FormController {
   /// }
   /// ```
   bool validate() {
+    _hasBeenSubmitted = true;
+
     bool isValid = true;
     resetAllErrors();
+
     _fields.forEach((name, field) {
       final error = field.validate();
       if (error != null) {
         field.setError(error);
         isValid = false;
         if (_debug && kDebugMode) {
-          print('fild $name - has error $error');
+          print('Field $name - has error $error');
         }
       } else {
         if (_debug && kDebugMode) {
-          print('fild $name - ok');
+          print('Field $name - ok');
         }
       }
     });
+
     return isValid;
   }
 
@@ -616,8 +909,11 @@ class FormController {
   /// }
   /// ```
   Future<bool> validateAsync() async {
+    _hasBeenSubmitted = true;
+
     bool isValid = true;
     resetAllErrors();
+
     for (final entry in _fields.entries) {
       final field = entry.value;
       final result = await field.validateAsync();
@@ -632,6 +928,7 @@ class FormController {
         }
       }
     }
+
     return isValid;
   }
 

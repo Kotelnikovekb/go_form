@@ -1,6 +1,7 @@
 # GoForm
- 
+
 **Available Translations:**
+
 - [English](README.md)
 - [Русский](README_RU.md)
 
@@ -10,11 +11,12 @@
 - [How to Install](#how-to-install)
 - [Features](#features-of-goform)
 - [Quick Start](#quick-start)
-  - [Creating a Form with Dynamic Fields](#creating-a-form-with-dynamic-fields)
-  - [Validation Check Before Submission](#validation-check-before-submission)
-  - [Focus and Scrolling Example](#focus-and-scrolling-example)
-  - [Adding Errors](#adding-errors)
-  - [Resetting the Form](#resetting-the-form)
+    - [Creating a Form with Dynamic Fields](#creating-a-form-with-dynamic-fields)
+    - [Validation Check Before Submission](#validation-check-before-submission)
+    - [Focus and Scrolling Example](#focus-and-scrolling-example)
+    - [Adding Errors](#adding-errors)
+    - [Resetting the Form](#resetting-the-form)
+- [Validation Triggers](#validation-triggers)
 - [How to Create a Custom Field?](#how-to-create-a-custom-field)
 
 GoForm is a powerful library for managing forms in Flutter.  
@@ -41,19 +43,20 @@ without the need to manually handle controllers for each field.
   Fields can debounce rapid input changes using `debounceDuration`, reducing unnecessary processing or validations.
 
 - **Asynchronous validation**  
-  Add `asyncValidator` to a field to perform validation that requires waiting for server responses or background checks.  
+  Add `asyncValidator` to a field to perform validation that requires waiting for server responses or background
+  checks.  
   Use `formController.validateAsync()` to trigger validation across all fields.
 
 - **Advanced focus management**  
-  The `FormController` provides built-in methods for controlling focus between fields:  
-  - `focus(String name)` – focuses the field with the given name.  
-  - `unfocus(String name)` – removes focus from the specified field.  
-  - `unfocusAll()` – removes focus from all fields.  
-  - `focusNext(String name)` – moves focus to the next field.  
-  - `focusPrevious(String name)` – moves focus to the previous field.  
-  - `focusFirstError()` – focuses the first field that has a validation error.  
-  - `hasFocus(String name)` – returns `true` if the field is currently focused.  
-  - `hasError(String name)` – returns `true` if the field currently has an error.  
+  The `FormController` provides built-in methods for controlling focus between fields:
+    - `focus(String name)` – focuses the field with the given name.
+    - `unfocus(String name)` – removes focus from the specified field.
+    - `unfocusAll()` – removes focus from all fields.
+    - `focusNext(String name)` – moves focus to the next field.
+    - `focusPrevious(String name)` – moves focus to the previous field.
+    - `focusFirstError()` – focuses the first field that has a validation error.
+    - `hasFocus(String name)` – returns `true` if the field is currently focused.
+    - `hasError(String name)` – returns `true` if the field currently has an error.
 
 ---  
 
@@ -203,6 +206,59 @@ _formController.resetAllErrors
 (); // Очистка ошибок  
 ```
 
+## Validation Triggers
+
+GoForm provides fine-grained control over when validation occurs through `ValidationTrigger` enum:
+
+| **Trigger**          | **When it fires**                  | **Best for**                             |
+|----------------------|------------------------------------|------------------------------------------|
+| `onSubmit`           | Only when `validate()` is called   | Non-critical fields, confirmation fields |
+| `onValueChange`      | Every time the field value changes | Password strength, real-time feedback    |
+| `onFocusLost`        | When field loses focus (blur)      | Email format, most standard fields       |
+| `onFocusGained`      | When field gains focus             | Special cases, clearing errors           |
+| `onDebounceComplete` | After debounce period ends         | Search fields, API calls                 |
+| `manual`             | Only when explicitly called        | Custom validation logic                  |
+
+### Recommended Patterns
+
+#### 1. **User-Friendly Form** (Recommended for most cases)
+
+#### 2. **Strict Real-Time Validation**
+
+#### 3. **Conservative Approach**
+```dart
+FormController(
+  defaultValidationTriggers: {ValidationTrigger.onSubmit},
+  // Validate only when user tries to submit
+);
+```
+#### 4. **Mixed Strategy** (Advanced)
+
+```dart
+final controller = FormController(
+defaultValidationTriggers: {ValidationTrigger.onFocusLost},
+validateOnlyAfterFirstSubmit: true,
+);
+
+// Email: standard behavior
+controller.addTextField<String>(name: 'email', validator: emailValidator);
+
+// Password: real-time validation for security
+controller.addTextField<String>(
+name: 'password',
+validator: passwordValidator,
+validationTriggers: {ValidationTrigger.onValueChange},
+);
+
+// Terms: only on submit (avoid annoyance)
+controller.addTextField<bool>(
+name: 'acceptTerms',
+validator: termsValidator,
+validationTriggers: {ValidationTrigger.onSubmit},
+);
+
+```
+
 ### How to Create a Custom Field?
 
 Simply extend `FormFieldModelBase<T>` and implement `build()`:
@@ -247,7 +303,10 @@ class MyCustomField extends FormFieldModelBase<String> {
 ```
 
 # About the author
+
 My telegram channel - [@kotelnikoff_dev](https://t.me/kotelnikoff_dev)
+
 ### Contributions
 
-Contributions are welcome! Feel free to open issues or create pull requests on the [GitHub repository](https://github.com/Kotelnikovekb/go_form).
+Contributions are welcome! Feel free to open issues or create pull requests on
+the [GitHub repository](https://github.com/Kotelnikovekb/go_form).

@@ -1,3 +1,114 @@
+## [1.9.0] - 2025-08-26
+
+### Added
+
+- **Advanced validation trigger system** - Complete overhaul of form validation behavior with granular control:
+    - Added `defaultValidationTriggers` parameter to `FormController` constructor for setting global validation triggers
+    - Added `validateOnlyAfterFirstSubmit` parameter to improve UX by preventing validation errors during initial input
+    - Added `validationTriggers` parameter to `addTextField()` for field-specific validation behavior
+    - Added `setFieldValidationTriggers()` method to dynamically change validation triggers for specific fields
+    - Added `getFieldValidationTriggers()` method to retrieve current validation triggers for any field
+    - Added `validateField()` method for synchronous validation of individual fields
+    - Added `validateFieldAsync()` method for asynchronous validation of individual fields
+
+- **New ValidationTrigger enum values** for comprehensive validation control:
+    - `ValidationTrigger.onFocusLost` - validate when field loses focus
+    - `ValidationTrigger.onFocusGained` - validate when field gains focus
+    - `ValidationTrigger.onValueChange` - validate on every value change
+    - `ValidationTrigger.onDebounceComplete` - validate after debounce completion
+    - `ValidationTrigger.onSubmit` - validate only on form submission
+    - `ValidationTrigger.manual` - manual validation only
+
+- **Form introspection methods** for better debugging and development experience:
+  - Added `getFieldCount()` method to get the number of registered fields
+  - Added `isEmpty` getter to check if form has no registered fields
+  - Added `isNotEmpty` getter to check if form has registered fields
+  - Added `getFieldNames()` method to get a list of all registered field names
+
+### Improved
+
+- **Enhanced user experience** with `validateOnlyAfterFirstSubmit`:
+    - Prevents irritating validation errors during initial form input
+    - Enables real-time validation feedback after first submission attempt
+    - Follows modern UX patterns used by Gmail, Facebook, and other major platforms
+
+- **Better architecture** - removed circular dependencies between `FormController` and `FieldController`
+- **Comprehensive documentation** - added detailed API documentation with practical examples for all new features
+
+### Changed
+
+- **Breaking**: Default validation behavior is now `ValidationTrigger.onSubmit` only (was previously mixed)
+- Updated `addTextField()` method signature to include optional `validationTriggers` parameter
+
+### Migration Guide
+
+#### Before (v1.8.1):
+```dart
+final formController = FormController();
+// Validation behavior was not configurable
+```
+
+#### After (v1.9.0):
+
+```dart
+// For backward compatibility (validation only on submit)
+final formController = FormController();
+
+// For enhanced UX (recommended)
+final formController = FormController(
+  defaultValidationTriggers: {
+    ValidationTrigger.onFocusLost,
+    ValidationTrigger.onValueChange,
+  },
+  validateOnlyAfterFirstSubmit: true,
+);
+
+// For field-specific behavior
+formController.addTextField<String>(
+  name: 'email',
+  validator: emailValidator,
+  validationTriggers: {ValidationTrigger.onFocusLost},
+);
+
+formController.addTextField<String>(
+  name: 'password', 
+  validator: passwordValidator,
+  validationTriggers: {ValidationTrigger.onValueChange},
+);
+```
+
+### Examples
+
+#### Real-time validation with user-friendly experience:
+
+```dart
+final formController = FormController(
+  defaultValidationTriggers: {ValidationTrigger.onValueChange},
+  validateOnlyAfterFirstSubmit: true, // No errors until first submit
+);
+```
+
+#### Mixed validation strategies:
+
+```dart
+// Email: validate when user finishes typing
+formController.setFieldValidationTriggers('email', {
+  ValidationTrigger.onFocusLost
+});
+
+// Password: validate in real-time for security
+formController.setFieldValidationTriggers('password', {
+  ValidationTrigger.onValueChange,
+  ValidationTrigger.onFocusLost,
+});
+
+// Confirm password: validate only on submit
+formController.setFieldValidationTriggers('confirmPassword', {
+  ValidationTrigger.onSubmit
+});
+
+```
+
 ## [1.8.1] - 2025-07-05
 ### Fixed
 - Fixed an issue where validation error state would not clear after successful re-validation
