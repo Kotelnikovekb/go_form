@@ -1,3 +1,76 @@
+## [1.9.1] - 2025-08-26
+
+### Added
+
+- **Field-level validation triggers** - Now you can specify `validationTriggers` directly when creating form fields:
+  - Added `validationTriggers` parameter to `FormFieldModelBase` constructor
+  - Enables declarative validation behavior configuration at field creation time
+  - Provides cleaner, more intuitive API for setting field-specific validation rules
+
+### Improved
+
+- **Enhanced developer experience** with three levels of validation trigger configuration:
+  - **Global level**: `FormController.defaultValidationTriggers` for form-wide defaults
+  - **Field level**: `FormFieldModelBase.validationTriggers` for declarative field configuration
+  - **Programmatic level**: `setFieldValidationTriggers()` for dynamic runtime changes
+
+### Examples
+
+#### Declarative field-level validation triggers:
+
+```dart
+final formController = FormController(
+  defaultValidationTriggers: {ValidationTrigger.onSubmit}, // Global default
+);
+
+// Email validates on focus lost
+GoTextInput(
+  name: 'email',
+  label: 'Email',
+  validationTriggers: {ValidationTrigger.onFocusLost}, // Field-specific
+  validator: (val) => val?.contains('@') != true ? 'Invalid email' : null,
+),
+
+// Password validates in real-time
+GoTextInput(
+  name: 'password',
+  label: 'Password', 
+  validationTriggers: {ValidationTrigger.onValueChange}, // Field-specific
+  validator: passwordValidator,
+),
+
+// Confirm password uses global default (onSubmit only)
+GoTextInput(
+  name: 'confirmPassword',
+  label: 'Confirm Password',
+  // No validationTriggers specified - uses global default
+  validator: confirmPasswordValidator,
+),
+```
+
+#### Mixed configuration approach:
+
+```dart
+// 1. Set global defaults
+final formController = FormController(
+  defaultValidationTriggers: {ValidationTrigger.onFocusLost},
+);
+
+// 2. Override specific fields at creation
+GoTextInput(
+  name: 'phone',
+  validationTriggers: {ValidationTrigger.onDebounceComplete},
+  debounceDuration: Duration(milliseconds: 500),
+),
+
+// 3. Change programmatically if needed
+formController.setFieldValidationTriggers('phone', {
+  ValidationTrigger.onFocusLost,
+  ValidationTrigger.onValueChange,
+});
+```
+
+
 ## [1.9.0] - 2025-08-26
 
 ### Added

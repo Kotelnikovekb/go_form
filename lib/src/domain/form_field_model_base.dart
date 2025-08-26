@@ -73,6 +73,9 @@ abstract class FormFieldModelBase<T> {
   /// Optional callback that will be triggered after debounce completes.
   final void Function()? onDebounceComplete;
 
+  final Set<ValidationTrigger>? validationTriggers;
+
+
   /// Constructor for creating a form field.
   ///
   /// - `name` – Required unique name for the field.
@@ -89,6 +92,7 @@ abstract class FormFieldModelBase<T> {
     this.key,
     this.debounceDuration,
     this.onDebounceComplete,
+    this.validationTriggers,
   });
 
   /// Abstract method that must be implemented to define the UI of the field.
@@ -100,8 +104,6 @@ abstract class FormFieldModelBase<T> {
   ///
   /// Useful for dynamic analysis of form structure.
   Type get fieldType => T;
-
-
 
 
 
@@ -123,6 +125,7 @@ abstract class FormFieldModelBase<T> {
       key: key,
       debounceDuration: debounceDuration,
       onDebounceComplete: onDebounceComplete,
+      validationTriggers: validationTriggers,
     );
   }
 
